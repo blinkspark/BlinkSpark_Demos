@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BattleOfShips.h"
+#include "BOS_Projectile.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "BOS_PlayerController.h"
@@ -32,6 +33,7 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
 	Gun->SetupAttachment(RootComponent);
 
+	ProjectileClass = ABOS_Projectile::StaticClass();
 }
 
 // Called when the game starts or when spawned
@@ -61,7 +63,7 @@ void ABOS_ShipBlock::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ABOS_ShipBlock::Forward);
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &ABOS_ShipBlock::Right);
 	PlayerInputComponent->BindAxis(TEXT("GunRotate"), this, &ABOS_ShipBlock::RotateGun);
-	PlayerInputComponent->BindAction(TEXT("Shoot"),IE_Pressed , this, &ABOS_ShipBlock::Shoot);
+	PlayerInputComponent->BindAction(TEXT("Shoot"), IE_Pressed, this, &ABOS_ShipBlock::Shoot);
 
 }
 
@@ -89,17 +91,20 @@ void ABOS_ShipBlock::FollowV_Implementation()
 
 void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Hit"));
-	if (!OtherActor->GetOwner() && (Cast<APawn>(GetRootActor())->GetController()))
+	if (Cast<ABOS_ShipBlock>(OtherActor))
 	{
-		auto hitLoc = Hit.Location;
-		auto loc = GetActorLocation();
-		auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
-		auto yaw = rot.Yaw;
-		auto locYaw = yaw - GetActorRotation().Yaw;
-		auto socketName = GetSocketNameByAngle(locYaw);
-		OnAttach(OtherActor, socketName);
+		if (!OtherActor->GetOwner() && (Cast<ABOS_ShipBlock>(GetRootActor())->GetController()))
+		{
+			auto hitLoc = Hit.Location;
+			auto loc = GetActorLocation();
+			auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
+			auto yaw = rot.Yaw;
+			auto locYaw = yaw - GetActorRotation().Yaw;
+			auto socketName = GetSocketNameByAngle(locYaw);
+			OnAttach(OtherActor, socketName);
+		}
 	}
+
 }
 
 void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketName)
@@ -162,5 +167,15 @@ void ABOS_ShipBlock::Shoot_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
 
-
+	auto world = GetWorld();
+	if (world)
+	{
+		auto trans = Gun->GetSocketTransform(TEXT("Gun"));
+		auto loc = trans.GetLocation();
+		auto rot = FRotator(trans.GetRotation());
+		FActorSpawnParameters sp;
+		sp.Instigator = this;
+		auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
+		UE_LOG(LogTemp, Warning, TEXT("%s"), trans.ToString().GetCharArray().GetData());
+	}
 }
