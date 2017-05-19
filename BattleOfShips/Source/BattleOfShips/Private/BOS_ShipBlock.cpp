@@ -61,6 +61,8 @@ void ABOS_ShipBlock::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ABOS_ShipBlock::Forward);
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &ABOS_ShipBlock::Right);
 	PlayerInputComponent->BindAxis(TEXT("GunRotate"), this, &ABOS_ShipBlock::RotateGun);
+	PlayerInputComponent->BindAction(TEXT("Shoot"),IE_Pressed , this, &ABOS_ShipBlock::Shoot);
+
 }
 
 void ABOS_ShipBlock::Forward_Implementation(float Axis)
@@ -154,4 +156,11 @@ void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
 	GunRotator.Add(0.f, GunRotateDelta * Axis, 0.f);
 	Gun->SetWorldRotation(GunRotator);
+}
+
+void ABOS_ShipBlock::Shoot_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
+
+
 }

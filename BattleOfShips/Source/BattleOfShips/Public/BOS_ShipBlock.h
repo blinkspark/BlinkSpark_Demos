@@ -46,6 +46,11 @@ public:
 	void RotateGun(float Axis);
 	void RotateGun_Implementation(float Axis);
 
+	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
+	void Shoot();
+	void Shoot_Implementation();
+
+
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 	void FollowV();
 	void FollowV_Implementation();
@@ -57,6 +62,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 	void OnAttach(AActor *OtherActor, FName SocketName);
 	void OnAttach_Implementation(AActor *OtherActor, FName SocketName);
+
+
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
 	FName GetSocketNameByAngle(float Angle);
@@ -78,24 +85,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent *ShipBody;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components|Collision", meta = (AllowPrivateAccess = "true"))
-	UBoxComponent *BoxR;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components|Collision", meta = (AllowPrivateAccess = "true"))
-	UBoxComponent *BoxRD;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components|Collision", meta = (AllowPrivateAccess = "true"))
-	UBoxComponent *BoxRU;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components|Collision", meta = (AllowPrivateAccess = "true"))
-	UBoxComponent *BoxL;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components|Collision", meta = (AllowPrivateAccess = "true"))
-	UBoxComponent *BoxLD;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components|Collision", meta = (AllowPrivateAccess = "true"))
-	UBoxComponent *BoxLU;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	float ImpulseForce = 10000.f;
