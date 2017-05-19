@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "BOS_Projectile.generated.h"
 
+
 UCLASS()
 class BATTLEOFSHIPS_API ABOS_Projectile : public AActor
 {

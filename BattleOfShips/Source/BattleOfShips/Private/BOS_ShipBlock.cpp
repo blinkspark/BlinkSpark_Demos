@@ -51,7 +51,9 @@ void ABOS_ShipBlock::Tick(float DeltaTime)
 	//if (GetInputAxisValue(TEXT("Forward"))
 	//	|| GetInputAxisValue(TEXT("Right")))
 	//{
+#if ROTATE_SWITCH
 	FollowV();
+#endif
 	//}
 }
 
@@ -158,12 +160,16 @@ AActor * ABOS_ShipBlock::GetRootActor()
 	return ret;
 }
 
-
 void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
+#if ROTATE_SWITCH
 	GunRotator.Add(0.f, GunRotateDelta * Axis, 0.f);
 	Gun->SetWorldRotation(GunRotator);
+#else
+	ShipBody->AddAngularImpulse(FVector(0.f, 0.f, Axis * (AngularImpulse)));
+#endif
 }
+
 
 void ABOS_ShipBlock::Shoot_Implementation()
 {
