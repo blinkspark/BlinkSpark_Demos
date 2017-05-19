@@ -85,6 +85,8 @@ void ABOS_ShipBlock::FollowV_Implementation()
 
 	auto deltaR = UKismetMathLibrary::NormalizedDeltaRotator(currentR, vr);
 	auto yaw = FMath::GetMappedRangeValueUnclamped(FVector2D(-90.f, 90.f), FVector2D(-DeltaNormalizer, DeltaNormalizer), deltaR.Yaw);
+	//auto yaw = deltaR.Yaw;
+
 
 	ShipBody->AddAngularImpulse(FVector(0.f, 0.f, yaw * (-AngularImpulse)));
 }

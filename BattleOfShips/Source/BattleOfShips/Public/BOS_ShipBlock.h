@@ -90,7 +90,7 @@ public:
 	float ImpulseForce = 10000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	float AngularImpulse = 2000.f;
+	float AngularImpulse = 3000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	float DeltaNormalizer = 1.f;

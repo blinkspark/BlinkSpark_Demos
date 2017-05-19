@@ -46,7 +46,7 @@ public:
 	float DMG = 10.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	float LaunchSpeed = 200.f;
+	float LaunchSpeed = 800.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	float LifeSpan = 3.f;
