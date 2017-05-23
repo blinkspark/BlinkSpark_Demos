@@ -39,11 +39,11 @@ void ABOS_Projectile::BeginPlay()
 
 	auto forward = RootComponent->GetForwardVector();
 	auto instigator = Cast<ABOS_ShipBlock>(GetInstigator());
-	auto parentSpeed = instigator ? instigator->GetVelocity() : FVector();
+	auto speed = instigator ? instigator->GetVelocity() : FVector();
 
-	ProjectileMovement->SetVelocityInLocalSpace(parentSpeed);
-	ProjectileMovement->MaxSpeed = 10000.f;
-	ProjectileMovement->SetVelocityInLocalSpace(FVector(1000.f, 0.f, 0.f));
+	ProjectileMovement->MaxSpeed = 0.f;
+	speed.X += LaunchSpeed;
+	ProjectileMovement->SetVelocityInLocalSpace(speed);
 	ProjectileMovement->UpdateComponentVelocity();
 
 }
