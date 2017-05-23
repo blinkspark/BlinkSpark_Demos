@@ -43,6 +43,12 @@ void ABOS_ShipBlock::BeginPlay()
 
 }
 
+float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DMG Taken"));
+	return 1.0f;
+}
+
 // Called every frame
 void ABOS_ShipBlock::Tick(float DeltaTime)
 {
@@ -95,7 +101,8 @@ void ABOS_ShipBlock::FollowV_Implementation()
 
 void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
 {
-	if (Cast<ABOS_ShipBlock>(OtherActor))
+	auto other = Cast<ABOS_ShipBlock>(OtherActor);
+	if (other)
 	{
 		if (!OtherActor->GetOwner() && (Cast<ABOS_ShipBlock>(GetRootActor())->GetController()))
 		{
@@ -173,8 +180,6 @@ void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 
 void ABOS_ShipBlock::Shoot_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
-
 	auto world = GetWorld();
 	if (world)
 	{
@@ -184,6 +189,5 @@ void ABOS_ShipBlock::Shoot_Implementation()
 		FActorSpawnParameters sp;
 		sp.Instigator = this;
 		auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
-		UE_LOG(LogTemp, Warning, TEXT("%s"), trans.ToString().GetCharArray().GetData());
 	}
 }

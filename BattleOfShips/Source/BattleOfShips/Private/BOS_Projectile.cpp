@@ -2,6 +2,7 @@
 
 #include "BattleOfShips.h"
 #include "BOS_ShipBlock.h"
+#include "DummyObj.h"
 #include "BOS_Projectile.h"
 
 
@@ -14,9 +15,9 @@ ABOS_Projectile::ABOS_Projectile()
 	BodyCollision = CreateDefaultSubobject<USphereComponent>(TEXT("BodyCollision"));
 	RootComponent = BodyCollision;
 	BodyCollision->SetSphereRadius(CollisionRadius);
-	BodyCollision->SetSimulatePhysics(true);
-	BodyCollision->OnComponentHit.AddDynamic(this, &ABOS_Projectile::OnBodyHit);
-	BodyCollision->GetBodyInstance()->bNotifyRigidBodyCollision = true;
+	//BodyCollision->OnComponentHit.AddDynamic(this, &ABOS_Projectile::OnBodyHit);
+	BodyCollision->OnComponentBeginOverlap.AddDynamic(this, &ABOS_Projectile::OnBodyHit);
+	BodyCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyMesh"));
 	BodyMesh->SetupAttachment(RootComponent);
@@ -25,6 +26,8 @@ ABOS_Projectile::ABOS_Projectile()
 	ParticleEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleEffect"));
 	ParticleEffect->SetupAttachment(RootComponent);
 
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+	ProjectileMovement->ProjectileGravityScale = 0.f;
 }
 
 // Called when the game starts or when spawned
@@ -37,20 +40,37 @@ void ABOS_Projectile::BeginPlay()
 	auto forward = RootComponent->GetForwardVector();
 	auto instigator = Cast<ABOS_ShipBlock>(GetInstigator());
 	auto parentSpeed = instigator ? instigator->GetVelocity() : FVector();
-	BodyCollision->SetPhysicsLinearVelocity(forward * LaunchSpeed + parentSpeed);
+
+	ProjectileMovement->SetVelocityInLocalSpace(parentSpeed);
+	ProjectileMovement->MaxSpeed = 10000.f;
+	ProjectileMovement->SetVelocityInLocalSpace(FVector(1000.f, 0.f, 0.f));
+	ProjectileMovement->UpdateComponentVelocity();
 
 }
 
-void ABOS_Projectile::OnBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
+void ABOS_Projectile::OnBodyHit_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Hit"));
-	Destroy();
-	BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	auto otherShipBlock = Cast<ABOS_ShipBlock>(OtherActor);
+	if (otherShipBlock) {
+		auto otherRootActor = otherShipBlock->GetRootActor();
+		if (otherRootActor != GetInstigator()) {
+			FDamageEvent de;
+			de.DamageTypeClass = UBOS_DamageTypeKinect::StaticClass();
+			otherRootActor->TakeDamage(10.f, de, GetInstigator()->GetController(), GetInstigator());
+			Destroy();
+			BodyCollision->SetSimulatePhysics(false);
+			BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 }
 
 // Called every frame
 void ABOS_Projectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	/*FVector dir;
+	float length;
+	GetVelocity().ToDirectionAndLength(dir, length);
+	UE_LOG(LogTemp, Warning, TEXT("Velocity: %f"), length);*/
 }
 
