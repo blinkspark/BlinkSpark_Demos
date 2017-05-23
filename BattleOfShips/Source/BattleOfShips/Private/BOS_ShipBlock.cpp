@@ -13,6 +13,7 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	forwardVec = FVector(1.f, 0.f, 0.f);
 	rightVec = FVector(0.f, 1.f, 0.f);
@@ -77,12 +78,32 @@ void ABOS_ShipBlock::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ABOS_ShipBlock::Forward_Implementation(float Axis)
 {
+	Forward_Server(Axis);
+}
+
+void ABOS_ShipBlock::Forward_Server_Implementation(float Axis)
+{
 	ShipBody->AddForce(ImpulseForce * forwardVec * Axis);
+}
+
+bool ABOS_ShipBlock::Forward_Server_Validate(float Axis)
+{
+	return true;
 }
 
 void ABOS_ShipBlock::Right_Implementation(float Axis)
 {
+	Right_Server(Axis);
+}
+
+void ABOS_ShipBlock::Right_Server_Implementation(float Axis)
+{
 	ShipBody->AddForce(ImpulseForce * rightVec * Axis);
+}
+
+bool ABOS_ShipBlock::Right_Server_Validate(float Axis)
+{
+	return true;
 }
 
 void ABOS_ShipBlock::FollowV_Implementation()
@@ -169,6 +190,11 @@ AActor * ABOS_ShipBlock::GetRootActor()
 
 void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
+	RotateGun_Server(Axis);
+}
+
+void ABOS_ShipBlock::RotateGun_Server_Implementation(float Axis)
+{
 #if ROTATE_SWITCH
 	GunRotator.Add(0.f, GunRotateDelta * Axis, 0.f);
 	Gun->SetWorldRotation(GunRotator);
@@ -177,8 +203,17 @@ void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 #endif
 }
 
+bool ABOS_ShipBlock::RotateGun_Server_Validate(float Axis)
+{
+	return true;
+}
 
 void ABOS_ShipBlock::Shoot_Implementation()
+{
+	Shoot_Server();
+}
+
+void ABOS_ShipBlock::Shoot_Server_Implementation()
 {
 	auto world = GetWorld();
 	if (world)
@@ -190,4 +225,9 @@ void ABOS_ShipBlock::Shoot_Implementation()
 		sp.Instigator = this;
 		auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
 	}
+}
+
+bool ABOS_ShipBlock::Shoot_Server_Validate()
+{
+	return true;
 }

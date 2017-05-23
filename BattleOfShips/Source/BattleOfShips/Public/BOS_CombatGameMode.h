@@ -16,5 +16,6 @@ class BATTLEOFSHIPS_API ABOS_CombatGameMode : public AGameModeBase
 public:
 	ABOS_CombatGameMode();
 	
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 	
 };

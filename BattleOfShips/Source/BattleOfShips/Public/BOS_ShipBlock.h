@@ -38,34 +38,34 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
 	void Forward(float Axis);
-	void Forward_Implementation(float Axis);
+	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
+	void Forward_Server(float Axis);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
 	void Right(float Axis);
-	void Right_Implementation(float Axis);
+	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
+	void Right_Server(float Axis);
+
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
 	void RotateGun(float Axis);
-	void RotateGun_Implementation(float Axis);
+	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
+	void RotateGun_Server(float Axis);
+
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
 	void Shoot();
-	void Shoot_Implementation();
-
+	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
+	void Shoot_Server();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 	void FollowV();
-	void FollowV_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 	void ShipBodyHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	void ShipBodyHit_Implementation(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 	void OnAttach(AActor *OtherActor, FName SocketName);
-	void OnAttach_Implementation(AActor *OtherActor, FName SocketName);
-
-
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
 	FName GetSocketNameByAngle(float Angle);

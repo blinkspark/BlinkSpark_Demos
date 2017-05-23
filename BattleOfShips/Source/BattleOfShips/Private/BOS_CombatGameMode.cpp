@@ -11,3 +11,9 @@ ABOS_CombatGameMode::ABOS_CombatGameMode() {
 	PlayerControllerClass = ABOS_PlayerController::StaticClass();
 	DefaultPawnClass = ABOS_ShipBlock::StaticClass();
 }
+
+void ABOS_CombatGameMode::PostLogin(APlayerController * NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	UE_LOG(LogTemp, Warning, TEXT("%s, post login"), NewPlayer->GetName().GetCharArray().GetData());
+}
