@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "BOS_PlayerController.h"
+#include "UnrealNetwork.h"
 #include "BOS_ShipBlock.h"
 
 
@@ -54,6 +55,13 @@ float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent,
 void ABOS_ShipBlock::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//auto world = GetWorld();
+	//if (world && world->IsServer())
+	//{
+	//	auto rootName = GetRootActor()->GetName();
+	//	UE_LOG(LogTemp, Warning, TEXT("%s"), rootName.GetCharArray().GetData());
+	//}
 
 	//if (GetInputAxisValue(TEXT("Forward"))
 	//	|| GetInputAxisValue(TEXT("Right")))
@@ -122,21 +130,28 @@ void ABOS_ShipBlock::FollowV_Implementation()
 
 void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
 {
-	auto other = Cast<ABOS_ShipBlock>(OtherActor);
-	if (other)
+	auto world = GetWorld();
+	if (world && world->IsServer())
 	{
-		if (!OtherActor->GetOwner() && (Cast<ABOS_ShipBlock>(GetRootActor())->GetController()))
+		auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
+		auto other = Cast<ABOS_ShipBlock>(OtherActor);
+		if (other
+			&& rootActor
+			&& other->GetRootActor() == other
+			&& rootActor->GetController()
+			&& !(other->GetController())
+			)
 		{
-			auto hitLoc = Hit.Location;
-			auto loc = GetActorLocation();
-			auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
-			auto yaw = rot.Yaw;
-			auto locYaw = yaw - GetActorRotation().Yaw;
-			auto socketName = GetSocketNameByAngle(locYaw);
-			OnAttach(OtherActor, socketName);
+				auto hitLoc = Hit.Location;
+				auto loc = GetActorLocation();
+				auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
+				auto yaw = rot.Yaw;
+				auto locYaw = yaw - GetActorRotation().Yaw;
+				auto socketName = GetSocketNameByAngle(locYaw);
+				OtherActor->SetOwner(GetRootActor());
+				OnAttach(other, socketName);
 		}
 	}
-
 }
 
 void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketName)
@@ -144,8 +159,7 @@ void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketNam
 	/*UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s, SocketName: %s"),
 		OtherActor->GetName().GetCharArray().GetData(),
 		SocketName.ToString().GetCharArray().GetData());*/
-	auto rootActor = GetRootActor();
-	OtherActor->SetOwner(rootActor);
+	OnAttachBlueprintDelegate(OtherActor, SocketName);
 }
 
 FName ABOS_ShipBlock::GetSocketNameByAngle(float Angle)
@@ -230,4 +244,10 @@ void ABOS_ShipBlock::Shoot_Server_Implementation()
 bool ABOS_ShipBlock::Shoot_Server_Validate()
 {
 	return true;
+}
+
+void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME( ABOS_ShipBlock, GunRotator);
 }

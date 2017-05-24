@@ -64,8 +64,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 	void ShipBodyHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	
-	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
+	UFUNCTION(NetMulticast, Reliable, Category = "ShipBlock|Multicast")
 	void OnAttach(AActor *OtherActor, FName SocketName);
+	UFUNCTION(BlueprintImplementableEvent, Category = "ShipBlock|Logic")
+	void OnAttachBlueprintDelegate(AActor *OtherActor, FName SocketName);
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
 	FName GetSocketNameByAngle(float Angle);
@@ -100,7 +102,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	float GunRotateDelta = 0.5f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	FRotator GunRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
