@@ -194,11 +194,10 @@ void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, A
 	{
 		auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
-		if (other
-			&& rootActor
-			&& !(other->GetAttachParentActor())
-			&& rootActor->GetController()
-			&& !(other->GetController())
+		auto otherRoot = Cast<ABOS_ShipBlock>(other->GetRootActor());
+		if (other && !(other->PlayerState)
+			&& rootActor && rootActor->PlayerState
+			&& otherRoot && !(otherRoot->PlayerState)
 			)
 		{
 				auto hitLoc = Hit.Location;
