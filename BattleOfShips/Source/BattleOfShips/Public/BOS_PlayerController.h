@@ -12,8 +12,11 @@ UCLASS()
 class BATTLEOFSHIPS_API ABOS_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	ABOS_PlayerController();
+
+	//virtual void FailedToSpawnPawn() override;
 	
-	
-	
-	
+	virtual void Tick(float DeltaTime) override;
 };

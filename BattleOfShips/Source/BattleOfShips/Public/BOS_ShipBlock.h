@@ -23,13 +23,14 @@ protected:
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UPROPERTY()
-	FVector forwardVec;
+		FVector forwardVec;
 
 	UPROPERTY()
-	FVector rightVec;
+		FVector rightVec;
 
 
-public:	
+public:
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -37,75 +38,105 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
-	void Forward(float Axis);
+		void Forward(float Axis);
 	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-	void Forward_Server(float Axis);
+		void Forward_Server(float Axis);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
-	void Right(float Axis);
+		void Right(float Axis);
 	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-	void Right_Server(float Axis);
-
-
-	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
-	void RotateGun(float Axis);
-	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-	void RotateGun_Server(float Axis);
+		void Right_Server(float Axis);
 
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
-	void Shoot();
+		void RotateGun(float Axis);
 	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-	void Shoot_Server();
+		void RotateGun_Server(float Axis);
+
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
+		void Shoot();
+	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
+		void Shoot_Server();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
-	void FollowV();
+		void FollowV();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
-	void ShipBodyHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	
+		void ShipBodyHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	UFUNCTION(NetMulticast, Reliable, Category = "ShipBlock|Multicast")
-	void OnAttach(AActor *OtherActor, FName SocketName);
+		void OnAttach(AActor *OtherActor, FName SocketName);
 	UFUNCTION(BlueprintImplementableEvent, Category = "ShipBlock|Logic")
-	void OnAttachBlueprintDelegate(AActor *OtherActor, FName SocketName);
+		void OnAttachBlueprintDelegate(AActor *OtherActor, FName SocketName);
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
-	FName GetSocketNameByAngle(float Angle);
+		FName GetSocketNameByAngle(float Angle);
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
-	AActor *GetRootActor();
+		AActor *GetRootActor();
+
+	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
+		AActor *GetAttachRootActor();
 
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		uint32 bLog : 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent *CameraBoom;
+		USpringArmComponent *CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UCameraComponent *Camera;
+		UCameraComponent *Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent *Gun;
+		UStaticMeshComponent *Gun;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent *ShipBody;
+		UStaticMeshComponent *ShipBody;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	float ImpulseForce = 10000.f;
+		float ImpulseForce = 10000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	float AngularImpulse = 3000.f;
+		float AngularImpulse = 3000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	float DeltaNormalizer = 1.f;
+		float DeltaNormalizer = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	float GunRotateDelta = 0.5f;
+		float GunRotateDelta = 0.5f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class ABOS_Projectile> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float AtkFactor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float DefFactor;
+
+	/****************  Replicated  **************************/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	FRotator GunRotator;
+		FRotator GunRotator;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class ABOS_Projectile> ProjectileClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float HP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float MaxHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float Atk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float Def;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float CritcalRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float CritcalDmg;
 
 };

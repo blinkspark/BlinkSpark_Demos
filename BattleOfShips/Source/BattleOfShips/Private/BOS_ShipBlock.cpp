@@ -2,6 +2,7 @@
 
 #include "BattleOfShips.h"
 #include "BOS_Projectile.h"
+#include "BOS_PlayerState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "BOS_PlayerController.h"
@@ -19,6 +20,15 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	forwardVec = FVector(1.f, 0.f, 0.f);
 	rightVec = FVector(0.f, 1.f, 0.f);
 
+	AtkFactor = 1.f;
+	DefFactor = 0.5f;
+
+	// Replicate Props
+	HP = MaxHP = 300.f;
+	Atk = 160.f;
+	Def = 20.f;
+	CritcalRate = 0.1f;
+	CritcalDmg = 1.5f;
 
 	ShipBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShipBody"));
 	RootComponent = ShipBody;
@@ -47,14 +57,63 @@ void ABOS_ShipBlock::BeginPlay()
 
 float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DMG Taken"));
-	return 1.0f;
+
+	// TODO Skill Factor
+	auto finalDmg = Damage*AtkFactor - Def*DefFactor;
+
+	auto randf = FMath::RandRange(0.f, 1.f);
+	if (finalDmg > 0.f && randf <= CritcalRate)
+	{
+		finalDmg *= CritcalDmg;
+	}
+
+	HP -= finalDmg;
+
+	HP = HP >= 0.f ? HP : 0.f;
+
+	if (HP == 0.f)
+	{
+		auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
+		auto ps = Cast<ABOS_PlayerState>(rootActor->PlayerState);
+		if (ps)
+		{
+			if (this == rootActor)
+			{
+				ps->bIsDead = true;
+			}
+			Destroy();
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("%f DMG Taken"), finalDmg > 0.f ? finalDmg : 1.f);
+	return finalDmg > 0.f ? finalDmg : 1.f;
 }
 
 // Called every frame
 void ABOS_ShipBlock::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	auto world = GetWorld();
+	if (world && world->IsServer())
+	{
+		auto attachRoot = Cast<ABOS_ShipBlock>(GetAttachParentActor());
+		if (attachRoot && !(attachRoot->GetController()))
+		{
+			/*auto attachParent = GetAttachParentActor();
+			if (attachParent && attachParent != this)
+			{
+				DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			}
+
+			TArray<AActor*> attachChildren;
+			this->GetAttachedActors(attachChildren);
+			for (AActor* actor : attachChildren)
+			{
+				actor->DetachRootComponentFromParent(true);
+			}*/
+		}
+	}
 
 	//auto world = GetWorld();
 	//if (world && world->IsServer())
@@ -137,7 +196,7 @@ void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, A
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
 		if (other
 			&& rootActor
-			&& other->GetRootActor() == other
+			&& !(other->GetAttachParentActor())
 			&& rootActor->GetController()
 			&& !(other->GetController())
 			)
@@ -148,7 +207,7 @@ void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, A
 				auto yaw = rot.Yaw;
 				auto locYaw = yaw - GetActorRotation().Yaw;
 				auto socketName = GetSocketNameByAngle(locYaw);
-				OtherActor->SetOwner(GetRootActor());
+				OtherActor->SetOwner(this);
 				OnAttach(other, socketName);
 		}
 	}
@@ -202,6 +261,16 @@ AActor * ABOS_ShipBlock::GetRootActor()
 	return ret;
 }
 
+AActor * ABOS_ShipBlock::GetAttachRootActor()
+{
+	AActor *ret = this;
+	while (ret->GetAttachParentActor())
+	{
+		ret = ret->GetAttachParentActor();
+	}
+	return ret;
+}
+
 void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
 	RotateGun_Server(Axis);
@@ -249,5 +318,11 @@ bool ABOS_ShipBlock::Shoot_Server_Validate()
 void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME( ABOS_ShipBlock, GunRotator);
+	DOREPLIFETIME(ABOS_ShipBlock, GunRotator);
+	DOREPLIFETIME(ABOS_ShipBlock, HP);
+	DOREPLIFETIME(ABOS_ShipBlock, MaxHP);
+	DOREPLIFETIME(ABOS_ShipBlock, Atk);
+	DOREPLIFETIME(ABOS_ShipBlock, Def);
+	DOREPLIFETIME(ABOS_ShipBlock, CritcalRate);
+	DOREPLIFETIME(ABOS_ShipBlock, CritcalDmg);
 }

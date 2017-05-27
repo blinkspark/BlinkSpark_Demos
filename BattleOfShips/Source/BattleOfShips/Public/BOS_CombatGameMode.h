@@ -17,5 +17,7 @@ public:
 	ABOS_CombatGameMode();
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	virtual bool ShouldSpawnAtStartSpot(AController* Player) override;
 	
 };
