@@ -54,7 +54,7 @@ public:
 		void RotateGun_Server(float Axis);
 
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
+	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Controlls")
 		void Shoot();
 	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void Shoot_Server();
@@ -79,10 +79,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
 		AActor *GetAttachRootActor();
 
+	UFUNCTION(BlueprintCallable, Category = "ShipBlock|AI")
+		ABOS_ShipBlock *FindTarget_AI();
+
+	UFUNCTION(BlueprintCallable, Category = "ShipBlock|AI")
+		void TakeAim_AI(ABOS_ShipBlock *target);
+
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		uint32 bLog : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		int32 TeamID;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent *CameraBoom;
@@ -95,6 +104,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent *ShipBody;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		USphereComponent *AI_SenceRange;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float ImpulseForce = 10000.f;

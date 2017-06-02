@@ -45,6 +45,10 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
 	Gun->SetupAttachment(RootComponent);
 
+	AI_SenceRange = CreateDefaultSubobject<USphereComponent>(TEXT("AI_SenceRange"));
+	AI_SenceRange->SetSphereRadius(800.f);
+	AI_SenceRange->SetupAttachment(RootComponent);
+
 	ProjectileClass = ABOS_Projectile::StaticClass();
 }
 
@@ -200,14 +204,14 @@ void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, A
 			&& otherRoot && !(otherRoot->PlayerState)
 			)
 		{
-				auto hitLoc = Hit.Location;
-				auto loc = GetActorLocation();
-				auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
-				auto yaw = rot.Yaw;
-				auto locYaw = yaw - GetActorRotation().Yaw;
-				auto socketName = GetSocketNameByAngle(locYaw);
-				OtherActor->SetOwner(this);
-				OnAttach(other, socketName);
+			auto hitLoc = Hit.Location;
+			auto loc = GetActorLocation();
+			auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
+			auto yaw = rot.Yaw;
+			auto locYaw = yaw - GetActorRotation().Yaw;
+			auto socketName = GetSocketNameByAngle(locYaw);
+			OtherActor->SetOwner(this);
+			OnAttach(other, socketName);
 		}
 	}
 }
@@ -270,6 +274,66 @@ AActor * ABOS_ShipBlock::GetAttachRootActor()
 	return ret;
 }
 
+ABOS_ShipBlock * ABOS_ShipBlock::FindTarget_AI()
+{
+	UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI Start"));
+	auto loc = GetActorLocation();
+	TArray<UPrimitiveComponent *> comps;
+	AI_SenceRange->GetOverlappingComponents(comps);
+	TMap<FString, ABOS_ShipBlock*> blocks;
+	for (auto comp : comps)
+	{
+		auto ship_block = Cast<ABOS_ShipBlock>(comp->GetOwner());
+		if (ship_block && ship_block->TeamID != TeamID)
+		{
+			auto name = ship_block->GetName();
+			blocks.Add(name, ship_block);
+		}
+	}
+
+	float minLength = -1.f;
+	ABOS_ShipBlock *nearest = nullptr;
+	for (auto i : blocks)
+	{
+		float length;
+		FVector dir;
+		auto enemyLoc = i.Value->GetActorLocation();
+		(loc - enemyLoc).ToDirectionAndLength(dir, length);
+		if (minLength < 0.f || length < minLength)
+		{
+			if (i.Value != this)
+			{
+				nearest = i.Value;
+				minLength = length;
+			}
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI End"));
+	return nearest;
+}
+
+void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
+{
+	UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI Start"));
+
+	if (Enemy)
+	{
+		auto enemyLoc = Enemy->GetActorLocation();
+		auto loc = GetActorLocation();
+
+		auto rot = UKismetMathLibrary::FindLookAtRotation(loc, enemyLoc);
+		UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI Rot is : %s"), rot.ToString().GetCharArray().GetData());
+		Gun->SetWorldRotation(rot);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI target is NULL"));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI End"));
+
+}
+
 void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
 	RotateGun_Server(Axis);
@@ -290,7 +354,7 @@ bool ABOS_ShipBlock::RotateGun_Server_Validate(float Axis)
 	return true;
 }
 
-void ABOS_ShipBlock::Shoot_Implementation()
+void ABOS_ShipBlock::Shoot()
 {
 	Shoot_Server();
 }
