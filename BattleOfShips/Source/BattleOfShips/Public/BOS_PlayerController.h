@@ -19,4 +19,5 @@ public:
 	//virtual void FailedToSpawnPawn() override;
 	
 	virtual void Tick(float DeltaTime) override;
+
 };

@@ -36,6 +36,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void PostInitializeComponents() override;
+	virtual bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
 		void Forward(float Axis);
@@ -74,16 +76,16 @@ public:
 		FName GetSocketNameByAngle(float Angle);
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
-		AActor *GetRootActor();
+		ABOS_ShipBlock *GetRootActor();
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
-		AActor *GetAttachRootActor();
+		ABOS_ShipBlock *GetAttachRootActor();
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|AI")
 		ABOS_ShipBlock *FindTarget_AI();
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|AI")
-		void TakeAim_AI(ABOS_ShipBlock *target);
+		void TakeAim_AI(ABOS_ShipBlock *Enemy);
 
 
 public:
@@ -150,5 +152,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float CritcalDmg;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		class UBOS_Skill *TestSkill;
 
 };
