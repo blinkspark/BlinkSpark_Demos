@@ -58,14 +58,15 @@ void ABOS_Projectile::BeginPlay()
 
 void ABOS_Projectile::OnBodyHit_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	auto world = GetWorld();
-	if (world && world->IsServer())
+	if (HasAuthority())
 	{
 		auto otherShipBlock = Cast<ABOS_ShipBlock>(OtherActor);
 		if (otherShipBlock) 
 		{
 			auto otherRootActor = otherShipBlock->GetRootActor();
-			if (otherRootActor != GetInstigator()) 
+			auto instigate = Cast<ABOS_ShipBlock>(GetInstigator());
+			auto root = instigate->GetRootActor();
+			if (otherRootActor != root) 
 			{
 				UGameplayStatics::ApplyDamage(OtherActor, DMG, GetInstigator()->GetController(), GetInstigator(), UBOS_DamageTypeKinect::StaticClass());
 				Destroy();
