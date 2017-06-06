@@ -59,7 +59,6 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 void ABOS_ShipBlock::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -381,7 +380,9 @@ bool ABOS_ShipBlock::RotateGun_Server_Validate(float Axis)
 void ABOS_ShipBlock::Shoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Shoot Start"));
-	Shoot_Server();
+	//Shoot_Server();
+
+	TestSkill->BeginCast();
 	UE_LOG(LogTemp, Warning, TEXT("Shoot End"));
 }
 

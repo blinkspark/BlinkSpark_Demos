@@ -20,7 +20,6 @@ void ABOS_CombatGameMode::PostLogin(APlayerController * NewPlayer)
 
 bool ABOS_CombatGameMode::ShouldSpawnAtStartSpot(AController * Player)
 {
-	UE_LOG(LogTemp, Warning, TEXT("here"));
 	return false;
 }
 

@@ -5,10 +5,17 @@
 #include "UObject/NoExportTypes.h"
 #include "BOS_Skill.generated.h"
 
+UENUM(BlueprintType)
+enum class ECastResult : uint8
+{
+	EOK, ECD
+};
+
+
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class BATTLEOFSHIPS_API UBOS_Skill : public UObject
 {
 	GENERATED_BODY()
@@ -22,14 +29,24 @@ public:
 		return true;
 	}
 
+	// Properties
 	UPROPERTY()
 		FTimerHandle CoolDownTimerHandle;
 
-	UFUNCTION(BlueprintCallable, Category = "Skill")
-		void Cast();
+	UPROPERTY()
+		float CD;
+
+	// Functions
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Skill")
+		void BeginCast();
+
+	UFUNCTION(BlueprintAuthorityOnly, Category = "Skill")
+		ECastResult TryCast();
+
+	UFUNCTION(BlueprintAuthorityOnly, Category = "Skill")
+		void OnCast();
 
 	UFUNCTION()
 		void TimerFunc();
-
 
 };
