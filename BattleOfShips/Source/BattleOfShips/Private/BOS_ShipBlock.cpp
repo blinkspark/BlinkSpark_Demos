@@ -46,6 +46,7 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 
 	Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
 	Gun->SetupAttachment(RootComponent);
+	Gun->SetIsReplicated(true);
 
 	AI_SenceRange = CreateDefaultSubobject<USphereComponent>(TEXT("AI_SenceRange"));
 	AI_SenceRange->SetSphereRadius(800.f);
@@ -99,6 +100,8 @@ float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent,
 void ABOS_ShipBlock::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	Gun->SetWorldRotation(GunRotator);
 
 	auto world = GetWorld();
 	if (world && world->IsServer())
@@ -339,13 +342,13 @@ void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
 {
 	UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI Start"));
 
-	if (Enemy)
+	if (Enemy && !(Enemy->IsPendingKill()))
 	{
 		auto enemyLoc = Enemy->GetActorLocation();
 		auto loc = GetActorLocation();
 
 		auto rot = UKismetMathLibrary::FindLookAtRotation(loc, enemyLoc);
-		UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI Rot is : %s"), rot.ToString().GetCharArray().GetData());
+		this->GunRotator = rot;
 		Gun->SetWorldRotation(rot);
 	}
 	else
@@ -357,12 +360,8 @@ void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
 
 }
 
-void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
-{
-	RotateGun_Server(Axis);
-}
 
-void ABOS_ShipBlock::RotateGun_Server_Implementation(float Axis)
+void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
 #if ROTATE_SWITCH
 	GunRotator.Add(0.f, GunRotateDelta * Axis, 0.f);
@@ -372,7 +371,7 @@ void ABOS_ShipBlock::RotateGun_Server_Implementation(float Axis)
 #endif
 }
 
-bool ABOS_ShipBlock::RotateGun_Server_Validate(float Axis)
+bool ABOS_ShipBlock::RotateGun_Validate(float Axis)
 {
 	return true;
 }

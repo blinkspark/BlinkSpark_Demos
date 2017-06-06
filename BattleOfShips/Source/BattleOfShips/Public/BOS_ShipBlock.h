@@ -50,11 +50,8 @@ public:
 		void Right_Server(float Axis);
 
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void RotateGun(float Axis);
-	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-		void RotateGun_Server(float Axis);
-
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Controlls")
 		void Shoot();
