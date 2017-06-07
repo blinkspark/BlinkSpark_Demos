@@ -39,24 +39,19 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void Forward(float Axis);
-	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-		void Forward_Server(float Axis);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Controlls")
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void Right(float Axis);
-	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-		void Right_Server(float Axis);
-
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void RotateGun(float Axis);
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Controlls")
 		void Shoot();
-	UFUNCTION(Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
-		void Shoot_Server();
+	UFUNCTION(NetMulticast, Reliable, Category = "ShipBlock|Multicast")
+		void Shoot_Multi();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 		void FollowV();
@@ -89,8 +84,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		uint32 bLog : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		int32 TeamID;
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent *CameraBoom;
@@ -108,16 +102,16 @@ public:
 		USphereComponent *AI_SenceRange;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		float ImpulseForce = 10000.f;
+		float ImpulseForce;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		float AngularImpulse = 3000.f;
+		float AngularImpulse;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		float DeltaNormalizer = 1.f;
+		float DeltaNormalizer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		float GunRotateDelta = 0.5f;
+		float GunRotateDelta;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class ABOS_Projectile> ProjectileClass;
@@ -127,6 +121,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float DefFactor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float AngularImpulseStepUp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		float ImpulseForceStepUp;
+
 
 	/****************  Replicated  **************************/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
@@ -152,5 +153,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		class UBOS_Skill *TestSkill;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		int32 TeamID;
 
 };

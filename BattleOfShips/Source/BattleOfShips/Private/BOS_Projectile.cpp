@@ -12,7 +12,7 @@ ABOS_Projectile::ABOS_Projectile()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
+	//bReplicates = true;
 
 	BodyCollision = CreateDefaultSubobject<USphereComponent>(TEXT("BodyCollision"));
 	RootComponent = BodyCollision;
@@ -38,7 +38,7 @@ void ABOS_Projectile::BeginPlay()
 	Super::BeginPlay();
 
 	auto world = GetWorld();
-	if (world && world->IsServer())
+	if (world)
 	{
 
 		SetLifeSpan(LifeSpan);
@@ -58,21 +58,23 @@ void ABOS_Projectile::BeginPlay()
 
 void ABOS_Projectile::OnBodyHit_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (HasAuthority())
+	auto world = GetWorld();
+	auto otherShipBlock = Cast<ABOS_ShipBlock>(OtherActor);
+	if (otherShipBlock)
 	{
-		auto otherShipBlock = Cast<ABOS_ShipBlock>(OtherActor);
-		if (otherShipBlock) 
+		auto otherRootActor = otherShipBlock->GetRootActor();
+		auto instigate = Cast<ABOS_ShipBlock>(GetInstigator());
+		auto root = instigate->GetRootActor();
+		if (otherRootActor != root)
 		{
-			auto otherRootActor = otherShipBlock->GetRootActor();
-			auto instigate = Cast<ABOS_ShipBlock>(GetInstigator());
-			auto root = instigate->GetRootActor();
-			if (otherRootActor != root) 
+			if (world->IsServer())
 			{
 				UGameplayStatics::ApplyDamage(OtherActor, DMG, GetInstigator()->GetController(), GetInstigator(), UBOS_DamageTypeKinect::StaticClass());
-				Destroy();
-				BodyCollision->SetSimulatePhysics(false);
-				BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 			}
+			BodyCollision->SetSimulatePhysics(false);
+			BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Destroy();
 		}
 	}
 }
@@ -87,8 +89,8 @@ void ABOS_Projectile::Tick(float DeltaTime)
 	UE_LOG(LogTemp, Warning, TEXT("Velocity: %f"), length);*/
 }
 
-void ABOS_Projectile::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ABOS_Projectile, DMG);
-}
+//void ABOS_Projectile::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//	DOREPLIFETIME(ABOS_Projectile, DMG);
+//}

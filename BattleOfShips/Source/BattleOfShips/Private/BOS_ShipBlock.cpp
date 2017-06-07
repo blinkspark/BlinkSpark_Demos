@@ -25,6 +25,14 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	AtkFactor = 1.f;
 	DefFactor = 0.5f;
 
+	AngularImpulse = 3000.f;
+	ImpulseForce = 10000.f;
+	AngularImpulseStepUp = 9000.f;
+	ImpulseForceStepUp = 3000.f;
+
+	DeltaNormalizer = 1.f;
+	GunRotateDelta = 0.5f;
+
 	// Replicate Props
 	HP = MaxHP = 300.f;
 	Atk = 160.f;
@@ -92,7 +100,7 @@ float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent,
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%f DMG Taken"), finalDmg > 0.f ? finalDmg : 1.f);
+	//UE_LOG(LogTemp, Warning, TEXT("%f DMG Taken"), finalDmg > 0.f ? finalDmg : 1.f);
 	return finalDmg > 0.f ? finalDmg : 1.f;
 }
 
@@ -176,30 +184,20 @@ bool ABOS_ShipBlock::ReplicateSubobjects(UActorChannel * Channel, FOutBunch * Bu
 
 void ABOS_ShipBlock::Forward_Implementation(float Axis)
 {
-	Forward_Server(Axis);
-}
-
-void ABOS_ShipBlock::Forward_Server_Implementation(float Axis)
-{
 	ShipBody->AddForce(ImpulseForce * forwardVec * Axis);
 }
-
-bool ABOS_ShipBlock::Forward_Server_Validate(float Axis)
+bool ABOS_ShipBlock::Forward_Validate(float Axis)
 {
 	return true;
 }
 
-void ABOS_ShipBlock::Right_Implementation(float Axis)
-{
-	Right_Server(Axis);
-}
 
-void ABOS_ShipBlock::Right_Server_Implementation(float Axis)
+void ABOS_ShipBlock::Right_Implementation(float Axis)
 {
 	ShipBody->AddForce(ImpulseForce * rightVec * Axis);
 }
 
-bool ABOS_ShipBlock::Right_Server_Validate(float Axis)
+bool ABOS_ShipBlock::Right_Validate(float Axis)
 {
 	return true;
 }
@@ -248,6 +246,16 @@ void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketNam
 		OtherActor->GetName().GetCharArray().GetData(),
 		SocketName.ToString().GetCharArray().GetData());*/
 	OnAttachBlueprintDelegate(OtherActor, SocketName);
+	if (HasAuthority())
+	{
+		this->AngularImpulse += AngularImpulseStepUp;
+		this->ImpulseForce += ImpulseForceStepUp;
+		auto other = Cast<ABOS_ShipBlock>(OtherActor);
+		if (other)
+		{
+			other->TeamID = TeamID;
+		}
+	}
 }
 
 FName ABOS_ShipBlock::GetSocketNameByAngle(float Angle)
@@ -302,7 +310,7 @@ ABOS_ShipBlock * ABOS_ShipBlock::GetAttachRootActor()
 
 ABOS_ShipBlock * ABOS_ShipBlock::FindTarget_AI()
 {
-	UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI Start"));
 	auto loc = GetActorLocation();
 	TArray<UPrimitiveComponent *> comps;
 	AI_SenceRange->GetOverlappingComponents(comps);
@@ -334,13 +342,13 @@ ABOS_ShipBlock * ABOS_ShipBlock::FindTarget_AI()
 			}
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI End"));
+	//UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI End"));
 	return nearest;
 }
 
 void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
 {
-	UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI Start"));
 
 	if (Enemy && !(Enemy->IsPendingKill()))
 	{
@@ -353,10 +361,10 @@ void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI target is NULL"));
+		//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI target is NULL"));
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI End"));
+	//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI End"));
 
 }
 
@@ -378,16 +386,15 @@ bool ABOS_ShipBlock::RotateGun_Validate(float Axis)
 
 void ABOS_ShipBlock::Shoot()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot Start"));
 	//Shoot_Server();
 
 	TestSkill->BeginCast();
-	UE_LOG(LogTemp, Warning, TEXT("Shoot End"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot End"));
 }
-
-void ABOS_ShipBlock::Shoot_Server_Implementation()
+void ABOS_ShipBlock::Shoot_Multi_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot_Server Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server Start"));
 
 	auto world = GetWorld();
 	if (world)
@@ -399,14 +406,10 @@ void ABOS_ShipBlock::Shoot_Server_Implementation()
 		sp.Instigator = this;
 		auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Shoot_Server End"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server End"));
 
 }
 
-bool ABOS_ShipBlock::Shoot_Server_Validate()
-{
-	return true;
-}
 
 void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
@@ -419,5 +422,6 @@ void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 	DOREPLIFETIME(ABOS_ShipBlock, CritcalRate);
 	DOREPLIFETIME(ABOS_ShipBlock, CritcalDmg);
 	DOREPLIFETIME(ABOS_ShipBlock, TestSkill);
+	DOREPLIFETIME(ABOS_ShipBlock, TeamID);
 
 }

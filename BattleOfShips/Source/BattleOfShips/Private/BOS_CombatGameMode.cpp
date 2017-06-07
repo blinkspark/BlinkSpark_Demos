@@ -23,5 +23,15 @@ bool ABOS_CombatGameMode::ShouldSpawnAtStartSpot(AController * Player)
 	return false;
 }
 
+void ABOS_CombatGameMode::RestartPlayer(AController * NewPlayer)
+{
+	Super::RestartPlayer(NewPlayer);
+	auto sb = Cast<ABOS_ShipBlock>(NewPlayer->GetPawn());
+	if (sb)
+	{
+		sb->TeamID = TeamID;
+		UE_LOG(LogTemp, Warning, TEXT("changing teamid: %d"), TeamID++);
+	}
+}
 
 

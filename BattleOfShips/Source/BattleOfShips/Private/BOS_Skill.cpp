@@ -56,7 +56,7 @@ void UBOS_Skill::OnCast()
 		world->GetTimerManager().SetTimer(CoolDownTimerHandle, this, &UBOS_Skill::TimerFunc, CD);
 		if (shipBlock)
 		{
-			shipBlock->Shoot_Server();
+			shipBlock->Shoot_Multi();
 		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("%s End"), ANSI_TO_TCHAR(__FUNCTION__));

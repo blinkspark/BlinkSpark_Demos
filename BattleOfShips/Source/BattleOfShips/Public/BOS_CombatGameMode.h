@@ -19,5 +19,11 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	virtual bool ShouldSpawnAtStartSpot(AController* Player) override;
+
+	virtual void RestartPlayer(class AController * NewPlayer) override;
+
+	// Properties
+	UPROPERTY()
+		int32 TeamID = 0;
 	
 };
