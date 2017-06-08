@@ -36,7 +36,7 @@ public:
 		float SpawnDelay = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		int32 InitialSpawnNum = 20;
+		int32 InitialSpawnNum = 15;
 
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 		void OnSpawn();
