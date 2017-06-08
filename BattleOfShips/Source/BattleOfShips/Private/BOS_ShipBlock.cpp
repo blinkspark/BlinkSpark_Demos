@@ -109,28 +109,32 @@ void ABOS_ShipBlock::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	Gun->SetWorldRotation(GunRotator);
-
-	auto world = GetWorld();
-	if (world && world->IsServer())
+	auto controller = Cast<ABOS_PlayerController>(GetController());
+	if (!controller)
 	{
-		auto attachRoot = Cast<ABOS_ShipBlock>(GetAttachParentActor());
-		if (attachRoot && !(attachRoot->GetController()))
-		{
-			/*auto attachParent = GetAttachParentActor();
-			if (attachParent && attachParent != this)
-			{
-				DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			}
-
-			TArray<AActor*> attachChildren;
-			this->GetAttachedActors(attachChildren);
-			for (AActor* actor : attachChildren)
-			{
-				actor->DetachRootComponentFromParent(true);
-			}*/
-		}
+		Gun->SetWorldRotation(GunRotator);
 	}
+
+	//auto world = GetWorld();
+	//if (world && world->IsServer())
+	//{
+	//	auto attachRoot = Cast<ABOS_ShipBlock>(GetAttachParentActor());
+	//	if (attachRoot && !(attachRoot->GetController()))
+	//	{
+	//		auto attachParent = GetAttachParentActor();
+	//		if (attachParent && attachParent != this)
+	//		{
+	//			DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	//		}
+
+	//		TArray<AActor*> attachChildren;
+	//		this->GetAttachedActors(attachChildren);
+	//		for (AActor* actor : attachChildren)
+	//		{
+	//			actor->DetachRootComponentFromParent(true);
+	//		}
+	//	}
+	//}
 
 	//auto world = GetWorld();
 	//if (world && world->IsServer())
@@ -164,7 +168,7 @@ void ABOS_ShipBlock::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	if (HasAuthority())
+	if (HasAuthority() && !TestSkill)
 	{
 		TestSkill = NewObject<UBOS_Skill>(this);
 	}
