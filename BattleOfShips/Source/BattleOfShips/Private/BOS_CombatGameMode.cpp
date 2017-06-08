@@ -20,9 +20,21 @@ void ABOS_CombatGameMode::PostLogin(APlayerController * NewPlayer)
 
 bool ABOS_CombatGameMode::ShouldSpawnAtStartSpot(AController * Player)
 {
-	UE_LOG(LogTemp, Warning, TEXT("here"));
 	return false;
 }
 
+void ABOS_CombatGameMode::RestartPlayer(AController * NewPlayer)
+{
+	Super::RestartPlayer(NewPlayer);
+	auto pc = Cast<ABOS_PlayerController>(NewPlayer);
+	auto uids = pc->GetUniqueID();
+	//UE_LOG(LogTemp, Warning, TEXT("uid: %d"), uids);
+	auto sb = Cast<ABOS_ShipBlock>(NewPlayer->GetPawn());
+	if (sb)
+	{
+		sb->TeamID = uids;
+		//UE_LOG(LogTemp, Warning, TEXT("changing teamid: %d"), TeamID++);
+	}
+}
 
 

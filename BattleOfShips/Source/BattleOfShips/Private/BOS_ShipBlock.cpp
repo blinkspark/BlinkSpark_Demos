@@ -6,7 +6,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "BOS_PlayerController.h"
+#include "BOS_Skill.h"
 #include "UnrealNetwork.h"
+#include "Engine/ActorChannel.h"
 #include "BOS_ShipBlock.h"
 
 
@@ -22,6 +24,14 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 
 	AtkFactor = 1.f;
 	DefFactor = 0.5f;
+
+	AngularImpulse = 3000.f;
+	ImpulseForce = 10000.f;
+	AngularImpulseStepUp = 9000.f;
+	ImpulseForceStepUp = 3000.f;
+
+	DeltaNormalizer = 1.f;
+	GunRotateDelta = 0.5f;
 
 	// Replicate Props
 	HP = MaxHP = 300.f;
@@ -44,15 +54,20 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 
 	Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
 	Gun->SetupAttachment(RootComponent);
+	Gun->SetIsReplicated(true);
+
+	AI_SenceRange = CreateDefaultSubobject<USphereComponent>(TEXT("AI_SenceRange"));
+	AI_SenceRange->SetSphereRadius(800.f);
+	AI_SenceRange->SetupAttachment(RootComponent);
 
 	ProjectileClass = ABOS_Projectile::StaticClass();
+
 }
 
 // Called when the game starts or when spawned
 void ABOS_ShipBlock::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -85,7 +100,7 @@ float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent,
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%f DMG Taken"), finalDmg > 0.f ? finalDmg : 1.f);
+	//UE_LOG(LogTemp, Warning, TEXT("%f DMG Taken"), finalDmg > 0.f ? finalDmg : 1.f);
 	return finalDmg > 0.f ? finalDmg : 1.f;
 }
 
@@ -94,26 +109,32 @@ void ABOS_ShipBlock::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	auto world = GetWorld();
-	if (world && world->IsServer())
+	auto controller = Cast<ABOS_PlayerController>(GetController());
+	if (!controller)
 	{
-		auto attachRoot = Cast<ABOS_ShipBlock>(GetAttachParentActor());
-		if (attachRoot && !(attachRoot->GetController()))
-		{
-			/*auto attachParent = GetAttachParentActor();
-			if (attachParent && attachParent != this)
-			{
-				DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			}
-
-			TArray<AActor*> attachChildren;
-			this->GetAttachedActors(attachChildren);
-			for (AActor* actor : attachChildren)
-			{
-				actor->DetachRootComponentFromParent(true);
-			}*/
-		}
+		Gun->SetWorldRotation(GunRotator);
 	}
+
+	//auto world = GetWorld();
+	//if (world && world->IsServer())
+	//{
+	//	auto attachRoot = Cast<ABOS_ShipBlock>(GetAttachParentActor());
+	//	if (attachRoot && !(attachRoot->GetController()))
+	//	{
+	//		auto attachParent = GetAttachParentActor();
+	//		if (attachParent && attachParent != this)
+	//		{
+	//			DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	//		}
+
+	//		TArray<AActor*> attachChildren;
+	//		this->GetAttachedActors(attachChildren);
+	//		for (AActor* actor : attachChildren)
+	//		{
+	//			actor->DetachRootComponentFromParent(true);
+	//		}
+	//	}
+	//}
 
 	//auto world = GetWorld();
 	//if (world && world->IsServer())
@@ -143,39 +164,50 @@ void ABOS_ShipBlock::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
-void ABOS_ShipBlock::Forward_Implementation(float Axis)
+void ABOS_ShipBlock::PostInitializeComponents()
 {
-	Forward_Server(Axis);
+	Super::PostInitializeComponents();
+
+	if (HasAuthority() && !TestSkill)
+	{
+		TestSkill = NewObject<UBOS_Skill>(this);
+	}
 }
 
-void ABOS_ShipBlock::Forward_Server_Implementation(float Axis)
+bool ABOS_ShipBlock::ReplicateSubobjects(UActorChannel * Channel, FOutBunch * Bunch, FReplicationFlags * RepFlags)
+{
+	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+	if (TestSkill != nullptr)
+	{
+		WroteSomething |= Channel->ReplicateSubobject(TestSkill, *Bunch, *RepFlags);
+	}
+
+	return WroteSomething;
+}
+
+void ABOS_ShipBlock::Forward_Implementation(float Axis)
 {
 	ShipBody->AddForce(ImpulseForce * forwardVec * Axis);
 }
-
-bool ABOS_ShipBlock::Forward_Server_Validate(float Axis)
+bool ABOS_ShipBlock::Forward_Validate(float Axis)
 {
 	return true;
 }
 
-void ABOS_ShipBlock::Right_Implementation(float Axis)
-{
-	Right_Server(Axis);
-}
 
-void ABOS_ShipBlock::Right_Server_Implementation(float Axis)
+void ABOS_ShipBlock::Right_Implementation(float Axis)
 {
 	ShipBody->AddForce(ImpulseForce * rightVec * Axis);
 }
 
-bool ABOS_ShipBlock::Right_Server_Validate(float Axis)
+bool ABOS_ShipBlock::Right_Validate(float Axis)
 {
 	return true;
 }
 
 void ABOS_ShipBlock::FollowV_Implementation()
 {
-
 	auto vr = Gun->GetComponentRotation();
 	auto currentR = GetActorRotation();
 
@@ -200,14 +232,14 @@ void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, A
 			&& otherRoot && !(otherRoot->PlayerState)
 			)
 		{
-				auto hitLoc = Hit.Location;
-				auto loc = GetActorLocation();
-				auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
-				auto yaw = rot.Yaw;
-				auto locYaw = yaw - GetActorRotation().Yaw;
-				auto socketName = GetSocketNameByAngle(locYaw);
-				OtherActor->SetOwner(this);
-				OnAttach(other, socketName);
+			auto hitLoc = Hit.Location;
+			auto loc = GetActorLocation();
+			auto rot = UKismetMathLibrary::FindLookAtRotation(loc, hitLoc);
+			auto yaw = rot.Yaw;
+			auto locYaw = yaw - GetActorRotation().Yaw;
+			auto socketName = GetSocketNameByAngle(locYaw);
+			OtherActor->SetOwner(this);
+			OnAttach(other, socketName);
 		}
 	}
 }
@@ -218,6 +250,16 @@ void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketNam
 		OtherActor->GetName().GetCharArray().GetData(),
 		SocketName.ToString().GetCharArray().GetData());*/
 	OnAttachBlueprintDelegate(OtherActor, SocketName);
+	if (HasAuthority())
+	{
+		this->AngularImpulse += AngularImpulseStepUp;
+		this->ImpulseForce += ImpulseForceStepUp;
+		auto other = Cast<ABOS_ShipBlock>(OtherActor);
+		if (other)
+		{
+			other->TeamID = TeamID;
+		}
+	}
 }
 
 FName ABOS_ShipBlock::GetSocketNameByAngle(float Angle)
@@ -250,32 +292,88 @@ FName ABOS_ShipBlock::GetSocketNameByAngle(float Angle)
 	return ret;
 }
 
-AActor * ABOS_ShipBlock::GetRootActor()
+ABOS_ShipBlock * ABOS_ShipBlock::GetRootActor()
 {
-	AActor *ret = this;
+	ABOS_ShipBlock *ret = this;
 	while (ret->GetOwner())
 	{
-		ret = ret->GetOwner();
+		ret = Cast<ABOS_ShipBlock>(ret->GetOwner());
 	}
 	return ret;
 }
 
-AActor * ABOS_ShipBlock::GetAttachRootActor()
+ABOS_ShipBlock * ABOS_ShipBlock::GetAttachRootActor()
 {
-	AActor *ret = this;
+	ABOS_ShipBlock *ret = this;
 	while (ret->GetAttachParentActor())
 	{
-		ret = ret->GetAttachParentActor();
+		ret = Cast<ABOS_ShipBlock>(ret->GetAttachParentActor());
 	}
 	return ret;
 }
 
-void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
+ABOS_ShipBlock * ABOS_ShipBlock::FindTarget_AI()
 {
-	RotateGun_Server(Axis);
+	//UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI Start"));
+	auto loc = GetActorLocation();
+	TArray<UPrimitiveComponent *> comps;
+	AI_SenceRange->GetOverlappingComponents(comps);
+	TMap<FString, ABOS_ShipBlock*> blocks;
+	for (auto comp : comps)
+	{
+		auto ship_block = Cast<ABOS_ShipBlock>(comp->GetOwner());
+		if (ship_block && ship_block->TeamID != TeamID)
+		{
+			auto name = ship_block->GetName();
+			blocks.Add(name, ship_block);
+		}
+	}
+
+	float minLength = -1.f;
+	ABOS_ShipBlock *nearest = nullptr;
+	for (auto i : blocks)
+	{
+		float length;
+		FVector dir;
+		auto enemyLoc = i.Value->GetActorLocation();
+		(loc - enemyLoc).ToDirectionAndLength(dir, length);
+		if (minLength < 0.f || length < minLength)
+		{
+			if (i.Value != this)
+			{
+				nearest = i.Value;
+				minLength = length;
+			}
+		}
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("FindTarget_AI End"));
+	return nearest;
 }
 
-void ABOS_ShipBlock::RotateGun_Server_Implementation(float Axis)
+void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI Start"));
+
+	if (Enemy && !(Enemy->IsPendingKill()))
+	{
+		auto enemyLoc = Enemy->GetActorLocation();
+		auto loc = GetActorLocation();
+
+		auto rot = UKismetMathLibrary::FindLookAtRotation(loc, enemyLoc);
+		this->GunRotator = rot;
+		Gun->SetWorldRotation(rot);
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI target is NULL"));
+	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI End"));
+
+}
+
+
+void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
 #if ROTATE_SWITCH
 	GunRotator.Add(0.f, GunRotateDelta * Axis, 0.f);
@@ -285,18 +383,23 @@ void ABOS_ShipBlock::RotateGun_Server_Implementation(float Axis)
 #endif
 }
 
-bool ABOS_ShipBlock::RotateGun_Server_Validate(float Axis)
+bool ABOS_ShipBlock::RotateGun_Validate(float Axis)
 {
 	return true;
 }
 
-void ABOS_ShipBlock::Shoot_Implementation()
+void ABOS_ShipBlock::Shoot()
 {
-	Shoot_Server();
-}
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot Start"));
+	//Shoot_Server();
 
-void ABOS_ShipBlock::Shoot_Server_Implementation()
+	TestSkill->BeginCast();
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot End"));
+}
+void ABOS_ShipBlock::Shoot_Multi_Implementation()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server Start"));
+
 	auto world = GetWorld();
 	if (world)
 	{
@@ -307,12 +410,10 @@ void ABOS_ShipBlock::Shoot_Server_Implementation()
 		sp.Instigator = this;
 		auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
 	}
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server End"));
+
 }
 
-bool ABOS_ShipBlock::Shoot_Server_Validate()
-{
-	return true;
-}
 
 void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
@@ -324,4 +425,7 @@ void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 	DOREPLIFETIME(ABOS_ShipBlock, Def);
 	DOREPLIFETIME(ABOS_ShipBlock, CritcalRate);
 	DOREPLIFETIME(ABOS_ShipBlock, CritcalDmg);
+	DOREPLIFETIME(ABOS_ShipBlock, TestSkill);
+	DOREPLIFETIME(ABOS_ShipBlock, TeamID);
+
 }
