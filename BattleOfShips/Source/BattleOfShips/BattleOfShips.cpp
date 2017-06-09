@@ -2,4 +2,4 @@
 
 #include "BattleOfShips.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, ServerListTemplate, "BattleOfShips" );
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, BattleOfShips, "BattleOfShips" );
