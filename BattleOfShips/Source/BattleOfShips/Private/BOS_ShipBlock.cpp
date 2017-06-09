@@ -222,7 +222,7 @@ void ABOS_ShipBlock::FollowV_Implementation()
 void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
 {
 	auto world = GetWorld();
-	if (world && world->IsServer())
+	if (world && world->IsServer() && OtherActor)
 	{
 		auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
