@@ -33,10 +33,10 @@ public:
 		TArray<TSubclassOf<ABOS_ShipBlock>> SpawnClasses;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		float SpawnDelay = 3.f;
+		float SpawnDelay = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		int32 InitialSpawnNum = 15;
+		int32 InitialSpawnNum = 20;
 
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 		void OnSpawn();
