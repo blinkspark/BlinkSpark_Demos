@@ -110,7 +110,7 @@ void ABOS_ShipBlock::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	auto controller = Cast<ABOS_PlayerController>(GetController());
-	if (!controller)
+	if (!PlayerState)
 	{
 		Gun->SetWorldRotation(GunRotator);
 	}
@@ -322,7 +322,10 @@ ABOS_ShipBlock * ABOS_ShipBlock::FindTarget_AI()
 	for (auto comp : comps)
 	{
 		auto ship_block = Cast<ABOS_ShipBlock>(comp->GetOwner());
-		if (ship_block && ship_block->TeamID != TeamID)
+		if (ship_block && ship_block->TeamID != TeamID
+			&& ship_block->GetRootActor()->PlayerState
+			&& ship_block->GetRootActor() != GetRootActor()
+			)
 		{
 			auto name = ship_block->GetName();
 			blocks.Add(name, ship_block);
@@ -411,7 +414,6 @@ void ABOS_ShipBlock::Shoot_Multi_Implementation()
 		auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server End"));
-
 }
 
 

@@ -25,8 +25,9 @@ void ABOS_BlockSpawnVolum::BeginPlay()
 	auto world = GetWorld();
 	if (world && world->IsServer() && HasAuthority())
 	{
-		FTimerHandle initTimerHandle;
-		world->GetTimerManager().SetTimer(initTimerHandle, this, &ABOS_BlockSpawnVolum::InitialSpawn, 0.1f);
+		InitialSpawn();
+		//FTimerHandle initTimerHandle;
+		//world->GetTimerManager().SetTimer(initTimerHandle, this, &ABOS_BlockSpawnVolum::InitialSpawn, 0.1f);
 		world->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ABOS_BlockSpawnVolum::OnSpawn, SpawnDelay, true);
 	}
 }
@@ -40,7 +41,7 @@ void ABOS_BlockSpawnVolum::Tick(float DeltaTime)
 
 void ABOS_BlockSpawnVolum::OnSpawn()
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s begin"), ANSI_TO_TCHAR(__FUNCTION__));
+	//UE_LOG(LogTemp, Warning, TEXT("%s begin"), ANSI_TO_TCHAR(__FUNCTION__));
 
 	auto origin = SpawnVolum->Bounds.Origin;
 	auto boxExtent = SpawnVolum->Bounds.BoxExtent;
@@ -56,12 +57,12 @@ void ABOS_BlockSpawnVolum::OnSpawn()
 		auto actor = world->SpawnActor(spawnClass, &spawnPoint, &FRotator::ZeroRotator, sp);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%s end"), ANSI_TO_TCHAR(__FUNCTION__));
+	//UE_LOG(LogTemp, Warning, TEXT("%s end"), ANSI_TO_TCHAR(__FUNCTION__));
 }
 
 void ABOS_BlockSpawnVolum::InitialSpawn()
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s begin"), ANSI_TO_TCHAR(__FUNCTION__));
+	//UE_LOG(LogTemp, Warning, TEXT("%s begin"), ANSI_TO_TCHAR(__FUNCTION__));
 
 	auto i = InitialSpawnNum;
 
@@ -69,7 +70,7 @@ void ABOS_BlockSpawnVolum::InitialSpawn()
 	{
 		OnSpawn();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%s end"), ANSI_TO_TCHAR(__FUNCTION__));
+	//UE_LOG(LogTemp, Warning, TEXT("%s end"), ANSI_TO_TCHAR(__FUNCTION__));
 
 }
 
