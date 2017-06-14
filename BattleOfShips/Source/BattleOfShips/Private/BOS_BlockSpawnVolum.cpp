@@ -2,13 +2,14 @@
 
 #include "BattleOfShips.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "BOS_CombatGameMode.h"
 #include "BOS_BlockSpawnVolum.h"
 
 
 // Sets default values
 ABOS_BlockSpawnVolum::ABOS_BlockSpawnVolum()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	SpawnVolum = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnVolum"));
@@ -21,7 +22,7 @@ ABOS_BlockSpawnVolum::ABOS_BlockSpawnVolum()
 void ABOS_BlockSpawnVolum::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	auto world = GetWorld();
 	if (world && world->IsServer() && HasAuthority())
 	{
@@ -52,9 +53,17 @@ void ABOS_BlockSpawnVolum::OnSpawn()
 	if (world && world->IsServer())
 	{
 		FActorSpawnParameters sp;
-		auto randIndex = FMath::RandHelper(SpawnClasses.Num());
-		auto spawnClass = SpawnClasses[randIndex];
-		auto actor = world->SpawnActor(spawnClass, &spawnPoint, &FRotator::ZeroRotator, sp);
+		if (SpawnClasses.Num() > 0)
+		{
+			auto randIndex = FMath::RandHelper(3);
+			/*auto spawnClass = SpawnClasses[randIndex];
+			auto actor = world->SpawnActor(spawnClass, &spawnPoint, &FRotator::ZeroRotator, sp);*/
+
+			randIndex = (randIndex + 1) * 100 + 1;
+			//UE_LOG(LogTemp, Warning, TEXT("randIndex:%d"), randIndex);
+			auto gm = Cast<ABOS_CombatGameMode>(world->GetAuthGameMode());
+			gm->ShipBlockFactory(randIndex, spawnPoint, FRotator::ZeroRotator);
+		}
 	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("%s end"), ANSI_TO_TCHAR(__FUNCTION__));

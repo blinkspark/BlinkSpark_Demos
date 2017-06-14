@@ -26,4 +26,13 @@ public:
 	UPROPERTY()
 		int32 TeamID = 0;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		UDataTable *ShipBlockTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		TArray<TSubclassOf<class ABOS_ShipBlock>> SpawnClasses;
+
+	// Funcs
+	UFUNCTION(BlueprintCallable, Category = "Factory|ShipBlock")
+		AActor *ShipBlockFactory(int32 TypeID, FVector SpawnLoc, FRotator SpawnRot);
 };

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BattleOfShips.h"
+#include "DummyObj.h"
 #include "BOS_Projectile.h"
 #include "BOS_PlayerState.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -62,12 +63,22 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 
 	ProjectileClass = ABOS_Projectile::StaticClass();
 
+	//ConstructorHelpers::FObjectFinder<UDataTable> TestTable(TEXT("/Game/UI/Book1.Book1"));
+	//this->TestDataTable = TestTable.Object;
+
 }
 
 // Called when the game starts or when spawned
 void ABOS_ShipBlock::BeginPlay()
 {
 	Super::BeginPlay();
+	/*static const FString str(TEXT("GENERAL"));
+	TArray<FTestData*> arr;
+	TestDataTable->GetAllRows<FTestData>(str, arr);
+	for (auto i : arr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s:%d"), i->name.GetCharArray().GetData(), i->age);
+	}*/
 }
 
 float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -376,6 +387,14 @@ void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
 }
 
 
+void ABOS_ShipBlock::OnDataRefresh_Implementation()
+{
+	if (Atk == 0.f)
+	{
+		Gun->SetVisibility(false);
+	}
+}
+
 void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
 #if ROTATE_SWITCH
@@ -393,10 +412,12 @@ bool ABOS_ShipBlock::RotateGun_Validate(float Axis)
 
 void ABOS_ShipBlock::Shoot()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Shoot Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot Start")); 
 	//Shoot_Server();
-
-	TestSkill->BeginCast();
+	if (Atk > 0.f)
+	{
+		TestSkill->BeginCast();
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot End"));
 }
 void ABOS_ShipBlock::Shoot_Multi_Implementation()

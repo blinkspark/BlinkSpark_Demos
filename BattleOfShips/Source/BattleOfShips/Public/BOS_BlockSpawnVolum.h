@@ -38,9 +38,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		int32 InitialSpawnNum = 20;
 
+
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 		void OnSpawn();
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 		void InitialSpawn();
-	
+
 };

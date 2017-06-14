@@ -79,10 +79,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|AI")
 		void TakeAim_AI(ABOS_ShipBlock *Enemy);
 
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "ShipBlock|Logic")
+		void OnDataRefresh();
+
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		uint32 bLog : 1;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	//	UDataTable *TestDataTable;
 
 
 
