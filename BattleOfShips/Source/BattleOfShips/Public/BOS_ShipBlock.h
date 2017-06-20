@@ -5,10 +5,25 @@
 #include "GameFramework/Pawn.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/BoxComponent.h"
+#include "AbilitySystemInterface.h"
 #include "BOS_ShipBlock.generated.h"
 
-UCLASS()
-class BATTLEOFSHIPS_API ABOS_ShipBlock : public APawn
+UENUM(BlueprintType)
+enum class EAbilityInput : uint8
+{
+	UseAbility1 UMETA(DisplayName = "Use Spell 1"), //This maps the first ability(input ID should be 0 in int) to the action mapping(which you define in the project settings) by the name of "UseAbility1". "Use Spell 1" is the blueprint name of the element.
+	UseAbility2 UMETA(DisplayName = "Use Spell 2"), //Maps ability 2(input ID 1) to action mapping UseAbility2. "Use Spell 2" is mostly used for when the enum is a blueprint variable.
+	UseAbility3 UMETA(DisplayName = "Use Spell 3"),
+	UseAbility4 UMETA(DisplayName = "Use Spell 4"),
+	WeaponAbility UMETA(DisplayName = "Use Weapon"), //This finally maps the fifth ability(here designated to be your weaponability, or auto-attack, or whatever) to action mapping "WeaponAbility".
+
+	 //You may also do something like define an enum element name that is not actually mapped to an input, for example if you have a passive ability that isn't supposed to have an input. This isn't usually necessary though as you usually grant abilities via input ID,
+	 //which can be negative while enums cannot. In fact, a constant called "INDEX_NONE" exists for the exact purpose of rendering an input as unavailable, and it's simply defined as -1.
+	 //Because abilities are granted by input ID, which is an int, you may use enum elements to describe the ID anyway however, because enums are fancily dressed up ints.
+};
+
+UCLASS(config=Game)
+class BATTLEOFSHIPS_API ABOS_ShipBlock : public APawn, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -38,6 +53,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PostInitializeComponents() override;
 	virtual bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
+	UAbilitySystemComponent* GetAbilitySystemComponent() const override //We add this function, overriding it from IAbilitySystemInterface.
+	{
+		return AbilitySystem;
+	};
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void Forward(float Axis);
@@ -48,9 +67,9 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void RotateGun(float Axis);
 
-	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Controlls")
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void Shoot();
-	UFUNCTION(NetMulticast, Reliable, Category = "ShipBlock|Multicast")
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "ShipBlock|Multicast")
 		void Shoot_Multi();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
@@ -91,7 +110,7 @@ public:
 	//	UDataTable *TestDataTable;
 
 
-
+	/** BP ReadOnly */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent *CameraBoom;
 
@@ -107,6 +126,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		USphereComponent *AI_SenceRange;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		FTimerHandle ShootTimer;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+		class UAbilitySystemComponent *AbilitySystem;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
+		TSubclassOf<class UGameplayAbility> Ability;
+
+	/** BP Editable */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float ImpulseForce;
 
@@ -163,4 +191,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		int32 TeamID;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	//	class UBlinkCombatSystemComponent *BlinkCombatSystemComponent;
 };
