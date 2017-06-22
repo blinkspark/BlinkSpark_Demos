@@ -12,6 +12,7 @@
 #include "Engine/ActorChannel.h"
 //#include "BlinkCombatSystemComponent.h"
 #include "AbilitySystemComponent.h"
+#include "BOS_AttributeSet.h"
 #include "BOS_ShipBlock.h"
 
 
@@ -66,6 +67,8 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	ProjectileClass = ABOS_Projectile::StaticClass();
 
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
+
+	AttributeSet = CreateDefaultSubobject<UBOS_AttributeSet>(TEXT("AttributeSet"));
 
 	//ConstructorHelpers::FObjectFinder<UDataTable> TestTable(TEXT("/Game/UI/Book1.Book1"));
 	//this->TestDataTable = TestTable.Object;
@@ -141,6 +144,7 @@ void ABOS_ShipBlock::Tick(float DeltaTime)
 	{
 		Gun->SetWorldRotation(GunRotator);
 	}
+
 
 	//auto world = GetWorld();
 	//if (world && world->IsServer())
