@@ -12,6 +12,7 @@
 #include "Engine/ActorChannel.h"
 //#include "BlinkCombatSystemComponent.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "BOS_AttributeSet.h"
 #include "BOS_ShipBlock.h"
 
@@ -90,9 +91,10 @@ void ABOS_ShipBlock::BeginPlay()
 
 	if (AbilitySystem)
 	{
-		if (HasAuthority() && Ability)
+		if (HasAuthority() && AtkAbility && HealAbility)
 		{
-			AbilitySystem->GiveAbility(FGameplayAbilitySpec(Ability.GetDefaultObject(), 1, 0));
+			AbilitySystem->GiveAbility(FGameplayAbilitySpec(AtkAbility.GetDefaultObject(), 1, 0));
+			AbilitySystem->GiveAbility(FGameplayAbilitySpec(HealAbility.GetDefaultObject(), 1, 1));
 
 			UE_LOG(LogTemp, Warning, TEXT("Give Ability"));
 		}
@@ -406,6 +408,17 @@ void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
 
 }
 
+
+bool ABOS_ShipBlock::CanAttack()
+{
+	bool res = false;
+	auto ps = GetAttachRootActor()->PlayerState;
+	if (ps)
+	{
+		res = true;
+	}
+	return res;
+}
 
 void ABOS_ShipBlock::OnDataRefresh_Implementation()
 {

@@ -2,11 +2,12 @@
 
 #include "BattleOfShips.h"
 #include "BOS_AttributeSet.h"
+#include "BOS_ShipBlock.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayModMagnitudeCalculation.h"
 #include "DmgExec.h"
 
-struct AttStruct
+struct DMGAttStruct
 {
 	DECLARE_ATTRIBUTE_CAPTUREDEF(HP); //The DECLARE_ATTRIBUTE_CAPTUREDEF macro actually only declares two variables. The variable names are dependent on the input, however. Here they will be HealthProperty(which is a UPROPERTY pointer)
 										  //and HealthDef(which is a FGameplayEffectAttributeCaptureDefinition).
@@ -14,7 +15,7 @@ struct AttStruct
 	DECLARE_ATTRIBUTE_CAPTUREDEF(DefenseMultiplier);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(BaseAttackPower);
 
-	AttStruct()
+	DMGAttStruct()
 	{
 		// We define the values of the variables we declared now. In this example, HealthProperty will point to the Health attribute in the UMyAttributeSet on the receiving target of this execution. The last parameter is a bool, and determines if we snapshot the attribute's value at the time of definition.
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UBOS_AttributeSet, HP, Target, false);
@@ -33,7 +34,7 @@ struct AttStruct
 UDmgExec::UDmgExec(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	AttStruct Attributes;
+	DMGAttStruct Attributes;
 
 	RelevantAttributesToCapture.Add(Attributes.HPDef); //RelevantAttributesToCapture is the array that contains all attributes you wish to capture, without exceptions. 
 	InvalidScopedModifierAttributes.Add(Attributes.HPDef); //However, an attribute added here on top of being added in RelevantAttributesToCapture will still be captured, but will not be shown for potential in-function modifiers in the GameplayEffect blueprint, more on that later.
@@ -46,14 +47,16 @@ UDmgExec::UDmgExec(const FObjectInitializer& ObjectInitializer)
 
 void UDmgExec::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, OUT FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Execute_Implementation"));
-	AttStruct Attributes;
+	DMGAttStruct Attributes;
 
 	auto targetASC = ExecutionParams.GetTargetAbilitySystemComponent();
 	auto sourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
 
 	auto targetActor = targetASC ? targetASC->AvatarActor : nullptr;
+	auto targetSB = targetActor ? Cast<ABOS_ShipBlock>(targetActor): nullptr;
 	auto sourceActor = sourceASC ? sourceASC->AvatarActor : nullptr;
+	auto sourceSB = sourceActor ? Cast<ABOS_ShipBlock>(sourceActor) : nullptr;
+
 
 	const auto &spec = ExecutionParams.GetOwningSpec();
 
@@ -81,10 +84,25 @@ void UDmgExec::Execute_Implementation(const FGameplayEffectCustomExecutionParame
 
 	dmg = dmg > HP ? HP : dmg;
 
-	if (dmg != 0.f)
+
+	if (dmg > 0.f && targetSB && sourceSB
+		&& targetSB->CanAttack()
+		&& targetSB->TeamID != sourceSB->TeamID)
 	{
 		OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(Attributes.HPProperty, EGameplayModOp::Additive, -dmg));
+		UE_LOG(LogTemp, Warning, TEXT("dmg: %f"), dmg);
+
+	}
+	else if (dmg < 0.f&& targetSB && sourceSB
+		&& targetSB->CanAttack()
+		&& targetSB->TeamID == sourceSB->TeamID)
+	{
+		if (targetSB->AttributeSet->HP - dmg > targetSB->MaxHP)
+		{
+			dmg = targetSB->AttributeSet->HP - targetSB->MaxHP;
+		}
+		OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(Attributes.HPProperty, EGameplayModOp::Additive, -dmg));
+		UE_LOG(LogTemp, Warning, TEXT("dmg: %f"), dmg);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("dmg: %f"), dmg);
 }

@@ -7,7 +7,7 @@ public class BattleOfShips : ModuleRules
 	public BattleOfShips(TargetInfo Target)
 	{
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore",
-            "Networking", "AIModule", "GameplayAbilities" });
+            "Networking", "AIModule", "GameplayAbilities", "GameplayTags" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

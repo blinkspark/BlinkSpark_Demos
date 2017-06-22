@@ -26,6 +26,14 @@ public:
 		GAMEPLAYATTRIBUTE_REPNOTIFY(UBOS_AttributeSet, HP);
 	}
 
+	UPROPERTY(Category = "Attribute|Team", EditAnywhere, ReplicatedUsing = OnRep_TeamID, BlueprintReadWrite)
+		float TeamID;
+	UFUNCTION()
+		void OnRep_TeamID()
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UBOS_AttributeSet, TeamID);
+	}
+
 	//Outgoing damage-multiplier.
 	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite, meta = (HideFromModifiers))
 		float AttackMultiplier;

@@ -101,6 +101,9 @@ public:
 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "ShipBlock|Logic")
 		void OnDataRefresh();
 
+	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
+		bool CanAttack();
+
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -132,7 +135,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 		class UAbilitySystemComponent *AbilitySystem;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
-		TSubclassOf<class UGameplayAbility> Ability;
+		TSubclassOf<class UGameplayAbility> AtkAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
+		TSubclassOf<class UGameplayAbility> HealAbility;
 
 	/** BP Editable */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
