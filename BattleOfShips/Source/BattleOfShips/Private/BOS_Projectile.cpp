@@ -4,6 +4,8 @@
 #include "BOS_ShipBlock.h"
 #include "DummyObj.h"
 #include "UnrealNetwork.h"
+#include "AbilitySystemComponent.h"
+#include "GameplayEffect.h"
 #include "BOS_Projectile.h"
 
 
@@ -65,12 +67,15 @@ void ABOS_Projectile::OnBodyHit_Implementation(UPrimitiveComponent* OverlappedCo
 		auto otherRootActor = otherShipBlock->GetRootActor();
 		auto instigate = Cast<ABOS_ShipBlock>(GetInstigator());
 		auto root = instigate->GetRootActor();
-		if (otherRootActor != root)
+		auto defObj = Cast<UGameplayEffect>(EffectToApply->GetDefaultObject());
+		if (otherRootActor != root && defObj)
 		{
+			
 			if (world->IsServer())
 			{
-				UGameplayStatics::ApplyDamage(OtherActor, DMG, GetInstigator()->GetController(), GetInstigator(), UBOS_DamageTypeKinect::StaticClass());
-
+				//UGameplayStatics::ApplyDamage(OtherActor, DMG, GetInstigator()->GetController(), GetInstigator(), UBOS_DamageTypeKinect::StaticClass());
+				auto otherAS = otherShipBlock->AbilitySystem;
+				auto ownAS = instigate->AbilitySystem->ApplyGameplayEffectToTarget(defObj, otherAS);
 			}
 			BodyCollision->SetSimulatePhysics(false);
 			BodyCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BattleOfShips.h"
+#include "DummyObj.h"
 #include "BOS_Projectile.h"
 #include "BOS_PlayerState.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -9,6 +10,11 @@
 #include "BOS_Skill.h"
 #include "UnrealNetwork.h"
 #include "Engine/ActorChannel.h"
+//#include "BlinkCombatSystemComponent.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "BOS_AttributeSet.h"
+#include "GameplayAbilitySet.h"
 #include "BOS_ShipBlock.h"
 
 
@@ -62,12 +68,41 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 
 	ProjectileClass = ABOS_Projectile::StaticClass();
 
+	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
+
+	AttributeSet = CreateDefaultSubobject<UBOS_AttributeSet>(TEXT("AttributeSet"));
+
+	AbilitySet = CreateDefaultSubobject<UGameplayAbilitySet>(TEXT("AbilitySet"));
+
+	//ConstructorHelpers::FObjectFinder<UDataTable> TestTable(TEXT("/Game/UI/Book1.Book1"));
+	//this->TestDataTable = TestTable.Object;
+	//BlinkCombatSystemComponent = CreateDefaultSubobject<UBlinkCombatSystemComponent>(TEXT("BlinkCombatSystemComponent"));
+
 }
 
 // Called when the game starts or when spawned
 void ABOS_ShipBlock::BeginPlay()
 {
 	Super::BeginPlay();
+	/*static const FString str(TEXT("GENERAL"));
+	TArray<FTestData*> arr;
+	TestDataTable->GetAllRows<FTestData>(str, arr);
+	for (auto i : arr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s:%d"), i->name.GetCharArray().GetData(), i->age);
+	}*/
+
+	if (AbilitySystem)
+	{
+		if (HasAuthority() && AtkAbility && HealAbility)
+		{
+			AbilitySystem->GiveAbility(FGameplayAbilitySpec(AtkAbility.GetDefaultObject(), 1, 0));
+			AbilitySystem->GiveAbility(FGameplayAbilitySpec(HealAbility.GetDefaultObject(), 1, 1));
+
+			UE_LOG(LogTemp, Warning, TEXT("Give Ability"));
+		}
+		AbilitySystem->InitAbilityActorInfo(this, this);
+	}
 }
 
 float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -110,10 +145,11 @@ void ABOS_ShipBlock::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	auto controller = Cast<ABOS_PlayerController>(GetController());
-	if (!controller)
+	if (!PlayerState)
 	{
 		Gun->SetWorldRotation(GunRotator);
 	}
+
 
 	//auto world = GetWorld();
 	//if (world && world->IsServer())
@@ -160,8 +196,8 @@ void ABOS_ShipBlock::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ABOS_ShipBlock::Forward);
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &ABOS_ShipBlock::Right);
 	PlayerInputComponent->BindAxis(TEXT("GunRotate"), this, &ABOS_ShipBlock::RotateGun);
-	PlayerInputComponent->BindAction(TEXT("Shoot"), IE_Pressed, this, &ABOS_ShipBlock::Shoot);
-
+	//PlayerInputComponent->BindAction(TEXT("Shoot"), IE_Pressed, this, &ABOS_ShipBlock::Shoot);
+	AbilitySystem->BindAbilityActivationToInputComponent(PlayerInputComponent, FGameplayAbiliyInputBinds("ConfirmInput", "CancelInput", "EAbilityInput"));
 }
 
 void ABOS_ShipBlock::PostInitializeComponents()
@@ -189,6 +225,7 @@ bool ABOS_ShipBlock::ReplicateSubobjects(UActorChannel * Channel, FOutBunch * Bu
 void ABOS_ShipBlock::Forward_Implementation(float Axis)
 {
 	ShipBody->AddForce(ImpulseForce * forwardVec * Axis);
+
 }
 bool ABOS_ShipBlock::Forward_Validate(float Axis)
 {
@@ -215,14 +252,13 @@ void ABOS_ShipBlock::FollowV_Implementation()
 	auto yaw = FMath::GetMappedRangeValueUnclamped(FVector2D(-90.f, 90.f), FVector2D(-DeltaNormalizer, DeltaNormalizer), deltaR.Yaw);
 	//auto yaw = deltaR.Yaw;
 
-
 	ShipBody->AddAngularImpulse(FVector(0.f, 0.f, yaw * (-AngularImpulse)));
 }
 
 void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
 {
 	auto world = GetWorld();
-	if (world && world->IsServer())
+	if (world && world->IsServer() && OtherActor)
 	{
 		auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
@@ -322,7 +358,10 @@ ABOS_ShipBlock * ABOS_ShipBlock::FindTarget_AI()
 	for (auto comp : comps)
 	{
 		auto ship_block = Cast<ABOS_ShipBlock>(comp->GetOwner());
-		if (ship_block && ship_block->TeamID != TeamID)
+		if (ship_block && ship_block->TeamID != TeamID
+			&& ship_block->GetRootActor()->PlayerState
+			&& ship_block->GetRootActor() != GetRootActor()
+			)
 		{
 			auto name = ship_block->GetName();
 			blocks.Add(name, ship_block);
@@ -363,15 +402,34 @@ void ABOS_ShipBlock::TakeAim_AI(ABOS_ShipBlock *Enemy)
 		this->GunRotator = rot;
 		Gun->SetWorldRotation(rot);
 	}
-	else
-	{
+	//else
+	//{
 		//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI target is NULL"));
-	}
+	//}
 
 	//UE_LOG(LogTemp, Warning, TEXT("TakeAim_AI End"));
 
 }
 
+
+bool ABOS_ShipBlock::CanAttack()
+{
+	bool res = false;
+	auto ps = GetAttachRootActor()->PlayerState;
+	if (ps)
+	{
+		res = true;
+	}
+	return res;
+}
+
+void ABOS_ShipBlock::OnDataRefresh_Implementation()
+{
+	if (Atk == 0.f)
+	{
+		Gun->SetVisibility(false);
+	}
+}
 
 void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
 {
@@ -388,13 +446,27 @@ bool ABOS_ShipBlock::RotateGun_Validate(float Axis)
 	return true;
 }
 
-void ABOS_ShipBlock::Shoot()
+void ABOS_ShipBlock::Shoot_Implementation()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Shoot Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot Start")); 
 	//Shoot_Server();
-
-	TestSkill->BeginCast();
+	/*if (Atk > 0.f)
+	{
+		TestSkill->BeginCast();
+	}*/
+	auto world = GetWorld();
+	if (world)
+	{
+		if (Atk > 0.f)
+		{
+			Shoot_Multi();
+		}
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot End"));
+}
+bool ABOS_ShipBlock::Shoot_Validate()
+{
+	return true;
 }
 void ABOS_ShipBlock::Shoot_Multi_Implementation()
 {
@@ -403,16 +475,21 @@ void ABOS_ShipBlock::Shoot_Multi_Implementation()
 	auto world = GetWorld();
 	if (world)
 	{
-		auto trans = Gun->GetSocketTransform(TEXT("Gun"));
-		auto loc = trans.GetLocation();
-		auto rot = FRotator(trans.GetRotation());
-		FActorSpawnParameters sp;
-		sp.Instigator = this;
-		auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
+		auto remaining = world->GetTimerManager().GetTimerRemaining(ShootTimer);
+		if (remaining <= 0.f)
+		{
+			world->GetTimerManager().SetTimer(ShootTimer, 1.f, false);
+			auto trans = Gun->GetSocketTransform(TEXT("Gun"));
+			auto loc = trans.GetLocation();
+			auto rot = FRotator(trans.GetRotation());
+			FActorSpawnParameters sp;
+			sp.Instigator = this;
+			auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
+		}
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server End"));
-
 }
+
 
 
 void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
