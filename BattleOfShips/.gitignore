@@ -33,6 +33,7 @@
 
 # UE4
 Saved/*
+!Saved/Config/*
 Intermediate/*
 .vs/*
 *.db
