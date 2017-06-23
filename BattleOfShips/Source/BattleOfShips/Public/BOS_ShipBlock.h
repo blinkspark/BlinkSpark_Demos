@@ -140,6 +140,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
 		TSubclassOf<class UGameplayAbility> HealAbility;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
+		class UGameplayAbilitySet *AbilitySet;
+
 	/** BP Editable */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float ImpulseForce;

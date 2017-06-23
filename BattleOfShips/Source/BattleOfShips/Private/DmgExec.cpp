@@ -37,7 +37,7 @@ UDmgExec::UDmgExec(const FObjectInitializer& ObjectInitializer)
 	DMGAttStruct Attributes;
 
 	RelevantAttributesToCapture.Add(Attributes.HPDef); //RelevantAttributesToCapture is the array that contains all attributes you wish to capture, without exceptions. 
-	InvalidScopedModifierAttributes.Add(Attributes.HPDef); //However, an attribute added here on top of being added in RelevantAttributesToCapture will still be captured, but will not be shown for potential in-function modifiers in the GameplayEffect blueprint, more on that later.
+	//InvalidScopedModifierAttributes.Add(Attributes.HPDef); //However, an attribute added here on top of being added in RelevantAttributesToCapture will still be captured, but will not be shown for potential in-function modifiers in the GameplayEffect blueprint, more on that later.
 
 	RelevantAttributesToCapture.Add(Attributes.BaseAttackPowerDef);
 	RelevantAttributesToCapture.Add(Attributes.DefenseMultiplierDef);

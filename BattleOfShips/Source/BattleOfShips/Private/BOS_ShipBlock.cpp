@@ -14,6 +14,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "BOS_AttributeSet.h"
+#include "GameplayAbilitySet.h"
 #include "BOS_ShipBlock.h"
 
 
@@ -70,6 +71,8 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
 
 	AttributeSet = CreateDefaultSubobject<UBOS_AttributeSet>(TEXT("AttributeSet"));
+
+	AbilitySet = CreateDefaultSubobject<UGameplayAbilitySet>(TEXT("AbilitySet"));
 
 	//ConstructorHelpers::FObjectFinder<UDataTable> TestTable(TEXT("/Game/UI/Book1.Book1"));
 	//this->TestDataTable = TestTable.Object;
