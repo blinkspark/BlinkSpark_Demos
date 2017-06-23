@@ -39,3 +39,4 @@ Intermediate/*
 *.opendb
 *.sln
 Binaries/*
+!Saved/Config/*
