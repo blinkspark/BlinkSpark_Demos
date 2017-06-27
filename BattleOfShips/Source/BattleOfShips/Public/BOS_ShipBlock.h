@@ -22,7 +22,28 @@ enum class EAbilityInput : uint8
 	 //Because abilities are granted by input ID, which is an int, you may use enum elements to describe the ID anyway however, because enums are fancily dressed up ints.
 };
 
-UCLASS(config=Game)
+USTRUCT(BlueprintType)
+struct FHexTree
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		class ABOS_ShipBlock *L;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		class ABOS_ShipBlock *R;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		class ABOS_ShipBlock *LU;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		class ABOS_ShipBlock *RU;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		class ABOS_ShipBlock *LD;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		class ABOS_ShipBlock *RD;
+
+	class ABOS_ShipBlock *GetOppositeLeaf(class ABOS_ShipBlock *Leaf);
+};
+
+UCLASS(config = Game)
 class BATTLEOFSHIPS_API ABOS_ShipBlock : public APawn, public IAbilitySystemInterface
 {
 	GENERATED_BODY()

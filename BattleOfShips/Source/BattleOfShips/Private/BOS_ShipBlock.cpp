@@ -506,3 +506,33 @@ void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 	DOREPLIFETIME(ABOS_ShipBlock, TeamID);
 
 }
+
+ABOS_ShipBlock * FHexTree::GetOppositeLeaf(ABOS_ShipBlock *Leaf)
+{
+	ABOS_ShipBlock *res = nullptr;
+	if (Leaf == L)
+	{
+		res = R;
+	}
+	else if (Leaf == R)
+	{
+		res = L;
+	}
+	else if (Leaf == LU)
+	{
+		res = RD;
+	}
+	else if (Leaf == RU)
+	{
+		res = LD;
+	}
+	else if (Leaf == LD)
+	{
+		res = RU;
+	}
+	else if (Leaf == RD)
+	{
+		res = LU;
+	}
+	return res;
+}
