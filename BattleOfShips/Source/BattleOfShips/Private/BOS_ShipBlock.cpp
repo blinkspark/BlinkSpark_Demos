@@ -358,9 +358,7 @@ ABOS_ShipBlock * ABOS_ShipBlock::FindTarget_AI()
 	for (auto comp : comps)
 	{
 		auto ship_block = Cast<ABOS_ShipBlock>(comp->GetOwner());
-		if (ship_block && ship_block->TeamID != TeamID
-			&& ship_block->GetRootActor()->PlayerState
-			&& ship_block->GetRootActor() != GetRootActor()
+		if (IsEnemy(ship_block)
 			)
 		{
 			auto name = ship_block->GetName();
@@ -421,6 +419,22 @@ bool ABOS_ShipBlock::CanAttack()
 		res = true;
 	}
 	return res;
+}
+
+int32 ABOS_ShipBlock::GetChildrenCount(AActor *ref)
+{
+	int32 count = 0;
+	int32 c = ref->Children.Num();
+	if (c > 0)
+	{
+		for (auto actor : ref->Children)
+		{
+			c += GetChildrenCount(actor);
+		}
+		count += c;
+	}
+
+	return count;
 }
 
 void ABOS_ShipBlock::OnDataRefresh_Implementation()
@@ -535,4 +549,11 @@ ABOS_ShipBlock * FHexTree::GetOppositeLeaf(ABOS_ShipBlock *Leaf)
 		res = LU;
 	}
 	return res;
+}
+
+bool ABOS_ShipBlock::IsEnemy(ABOS_ShipBlock *ship_block)
+{
+	return ship_block && ship_block->TeamID != TeamID
+		&& ship_block->GetRootActor()->PlayerState
+		&& ship_block->GetRootActor() != GetRootActor();
 }

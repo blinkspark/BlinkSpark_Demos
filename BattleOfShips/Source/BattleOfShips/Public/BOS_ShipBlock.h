@@ -116,6 +116,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|AI")
 		ABOS_ShipBlock *FindTarget_AI();
 
+	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
+		bool IsEnemy(ABOS_ShipBlock * ship_block);
+	
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|AI")
 		void TakeAim_AI(ABOS_ShipBlock *Enemy);
 
@@ -124,6 +127,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
 		bool CanAttack();
+
+	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
+		int32 GetChildrenCount(AActor *ref);
 
 
 public:
