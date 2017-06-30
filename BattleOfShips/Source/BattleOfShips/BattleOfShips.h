@@ -4,4 +4,4 @@
 
 #include "Engine.h"
 
-#define ROTATE_SWITCH 0
+#define ROTATE_SWITCH 1

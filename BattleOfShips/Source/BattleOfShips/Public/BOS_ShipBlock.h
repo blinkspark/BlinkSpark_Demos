@@ -131,6 +131,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ShipBlock|Logic")
 		int32 GetChildrenCount(AActor *ref);
 
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "ShipBlock|Ability")
+		void ElectricShock(ABOS_ShipBlock *Enemy);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "ShipBlock|Ability|Effect")
+		void ElectricShockEffect(ABOS_ShipBlock *Enemy);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Ability")
+		void SwitchAttackAbility(int32 index);
+
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -168,6 +177,9 @@ public:
 		TSubclassOf<class UGameplayAbility> HealAbility;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
+		TSubclassOf<class UGameplayAbility> ElectricShockAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
 		class UGameplayAbilitySet *AbilitySet;
 
 	/** BP Editable */
@@ -200,6 +212,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		class UBOS_AttributeSet *AttributeSet;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class UGameplayEffect> DMGEffect;
+
 
 	/****************  Replicated  **************************/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))

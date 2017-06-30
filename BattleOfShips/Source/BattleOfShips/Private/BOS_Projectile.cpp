@@ -32,6 +32,8 @@ ABOS_Projectile::ABOS_Projectile()
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->ProjectileGravityScale = 0.f;
+
+	LaunchSpeed = 800.f;
 }
 
 // Called when the game starts or when spawned
@@ -43,7 +45,6 @@ void ABOS_Projectile::BeginPlay()
 	if (world)
 	{
 
-		SetLifeSpan(LifeSpan);
 
 		auto forward = RootComponent->GetForwardVector();
 		auto instigator = Cast<ABOS_ShipBlock>(GetInstigator());
@@ -52,6 +53,7 @@ void ABOS_Projectile::BeginPlay()
 		ProjectileMovement->MaxSpeed = 0.f;
 		speed.X += LaunchSpeed;
 		ProjectileMovement->SetVelocityInLocalSpace(speed);
+		UE_LOG(LogTemp, Warning, TEXT("speed: %f"), speed.X);
 		ProjectileMovement->UpdateComponentVelocity();
 
 		DMG = instigator ? instigator->Atk : 160.f;

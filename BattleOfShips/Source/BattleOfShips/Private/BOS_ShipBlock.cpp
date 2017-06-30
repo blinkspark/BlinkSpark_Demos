@@ -99,7 +99,7 @@ void ABOS_ShipBlock::BeginPlay()
 			AbilitySystem->GiveAbility(FGameplayAbilitySpec(AtkAbility.GetDefaultObject(), 1, 0));
 			AbilitySystem->GiveAbility(FGameplayAbilitySpec(HealAbility.GetDefaultObject(), 1, 1));
 
-			UE_LOG(LogTemp, Warning, TEXT("Give Ability"));
+			//UE_LOG(LogTemp, Warning, TEXT("Give Ability"));
 		}
 		AbilitySystem->InitAbilityActorInfo(this, this);
 	}
@@ -435,6 +435,41 @@ int32 ABOS_ShipBlock::GetChildrenCount(AActor *ref)
 	}
 
 	return count;
+}
+
+void ABOS_ShipBlock::SwitchAttackAbility_Implementation(int32 index)
+{
+	FGameplayAbilitySpec *AbilitySpec = nullptr;
+	AbilitySpec = AbilitySystem->FindAbilitySpecFromInputID(0);
+	AbilitySystem->ClearAbility(AbilitySpec->Handle);
+	switch (index)
+	{
+	case 0:
+		AbilitySystem->GiveAbility(FGameplayAbilitySpec(AtkAbility.GetDefaultObject(), 1, 0));
+		break;
+	case 1:
+		AbilitySystem->GiveAbility(FGameplayAbilitySpec(ElectricShockAbility.GetDefaultObject(), 1, 0));
+		break;
+	default:
+		AbilitySystem->GiveAbility(FGameplayAbilitySpec(AtkAbility.GetDefaultObject(), 1, 0));
+		break;
+	}
+}
+
+bool ABOS_ShipBlock::SwitchAttackAbility_Validate(int32 index)
+{
+	return true;
+}
+
+void ABOS_ShipBlock::ElectricShock_Implementation(ABOS_ShipBlock *Enemy)
+{
+	if (HasAuthority())
+	{
+		auto effectToApply = Cast<UGameplayEffect>(DMGEffect.GetDefaultObject());
+		AbilitySystem->ApplyGameplayEffectToTarget(effectToApply, Enemy->AbilitySystem);
+		UE_LOG(LogTemp, Warning, TEXT("%s"), ANSI_TO_TCHAR(__FUNCTION__));
+	}
+	ElectricShockEffect(Enemy);
 }
 
 void ABOS_ShipBlock::OnDataRefresh_Implementation()
