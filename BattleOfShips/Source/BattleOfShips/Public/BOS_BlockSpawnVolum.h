@@ -30,7 +30,7 @@ public:
 		FTimerHandle SpawnTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
-		TArray<TSubclassOf<ABOS_ShipBlock>> SpawnClasses;
+		TMap<TSubclassOf<ABOS_ShipBlock>, float> SpawnMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float SpawnDelay = 0.f;

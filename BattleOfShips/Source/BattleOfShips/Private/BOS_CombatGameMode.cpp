@@ -57,29 +57,29 @@ AActor * ABOS_CombatGameMode::ShipBlockFactory(int32 TypeID, FVector SpawnLoc, F
 		//UE_LOG(LogTemp, Warning, TEXT("i:%d"), i);
 		TSubclassOf<ABOS_ShipBlock> ClassToSpawn = SpawnClasses[i - 1];
 		ret = world->SpawnActor(ClassToSpawn, &SpawnLoc, &SpawnRot, sp);
-		if (ret)
-		{
-			auto shipBlock = Cast<ABOS_ShipBlock>(ret);
-			if (shipBlock)
-			{
-				static const FString context(TEXT("GENERAL"));
-				auto row = ShipBlockTable->FindRow<FBlockType>(*FString::Printf(TEXT("%d"), TypeID), context);
-				if (row) 
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("OK"));
-					shipBlock->MaxHP = shipBlock->HP = row->HP;
-					shipBlock->Atk = row->Atk;
-					shipBlock->Def = row->Def;
-					shipBlock->CritcalRate = row->Crit;
-					shipBlock->OnDataRefresh();
-					//TODO AtkSpeed
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Failed to read data from ShipBlockTable."));
-				}
-			}
-		}
+		//if /(ret)
+		//{
+		//	auto shipBlock = Cast<ABOS_ShipBlock>(ret);
+		//	if (shipBlock)
+		//	{
+		//		static const FString context(TEXT("GENERAL"));
+		//		auto row = ShipBlockTable->FindRow<FBlockType>(*FString::Printf(TEXT("%d"), TypeID), context);
+		//		if (row) 
+		//		{
+		//			//UE_LOG(LogTemp, Warning, TEXT("OK"));
+		//			shipBlock->MaxHP = shipBlock->HP = row->HP;
+		//			shipBlock->Atk = row->Atk;
+		//			shipBlock->Def = row->Def;
+		//			shipBlock->CritcalRate = row->Crit;
+		//			shipBlock->OnDataRefresh();
+		//			//TODO AtkSpeed
+		//		}
+		//		else
+		//		{
+		//			UE_LOG(LogTemp, Warning, TEXT("Failed to read data from ShipBlockTable."));
+		//		}
+		//	}
+		//}
 	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("%s end"), ANSI_TO_TCHAR(__FUNCTION__));

@@ -288,8 +288,12 @@ void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketNam
 	OnAttachBlueprintDelegate(OtherActor, SocketName);
 	if (HasAuthority())
 	{
-		this->AngularImpulse += AngularImpulseStepUp;
-		this->ImpulseForce += ImpulseForceStepUp;
+		//this->AngularImpulse += AngularImpulseStepUp;
+		//this->ImpulseForce += ImpulseForceStepUp;
+
+		auto childrenCount = GetChildrenCount(this);
+		AngularImpulse = AngularImpulseStepUp * (childrenCount + 1) + AngularImpulseStepUp / (10 - childrenCount);
+		ImpulseForce = ImpulseForceStepUp * (childrenCount + 1) + AngularImpulseStepUp / (10 - childrenCount);
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
 		if (other)
 		{

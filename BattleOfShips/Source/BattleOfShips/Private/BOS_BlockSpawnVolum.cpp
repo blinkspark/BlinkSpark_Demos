@@ -47,23 +47,40 @@ void ABOS_BlockSpawnVolum::OnSpawn()
 	auto origin = SpawnVolum->Bounds.Origin;
 	auto boxExtent = SpawnVolum->Bounds.BoxExtent;
 
-	auto spawnPoint = UKismetMathLibrary::RandomPointInBoundingBox(origin, boxExtent);
 
 	auto world = GetWorld();
 	if (world && world->IsServer())
 	{
+		
 		FActorSpawnParameters sp;
-		if (SpawnClasses.Num() > 0)
+		sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
+		ABOS_ShipBlock *block = nullptr;
+		auto mapCount = SpawnMap.Num();
+		while (!block && mapCount)
 		{
-			auto randIndex = FMath::RandHelper(3);
-			/*auto spawnClass = SpawnClasses[randIndex];
-			auto actor = world->SpawnActor(spawnClass, &spawnPoint, &FRotator::ZeroRotator, sp);*/
+			for (auto m : SpawnMap)
+			{
+				float rand = FMath::RandRange(0.f, 1.f);
+				if (rand < m.Value)
+				{
+					auto spawnPoint = UKismetMathLibrary::RandomPointInBoundingBox(origin, boxExtent);
+					block = Cast<ABOS_ShipBlock>(world->SpawnActor(m.Key, &spawnPoint, &FRotator::ZeroRotator, sp));
+				}
+			}
 
-			randIndex = (randIndex + 1) * 100 + 1;
-			//UE_LOG(LogTemp, Warning, TEXT("randIndex:%d"), randIndex);
-			auto gm = Cast<ABOS_CombatGameMode>(world->GetAuthGameMode());
-			gm->ShipBlockFactory(randIndex, spawnPoint, FRotator::ZeroRotator);
 		}
+		
+		//if (SpawnClasses.Num() > 0)
+		//{
+		//	auto randIndex = FMath::RandHelper(3);
+		//	/*auto spawnClass = SpawnClasses[randIndex];
+		//	auto actor = world->SpawnActor(spawnClass, &spawnPoint, &FRotator::ZeroRotator, sp);*/
+
+		//	randIndex = (randIndex + 1) * 100 + 1;
+		//	//UE_LOG(LogTemp, Warning, TEXT("randIndex:%d"), randIndex);
+		//	auto gm = Cast<ABOS_CombatGameMode>(world->GetAuthGameMode());
+		//	gm->ShipBlockFactory(randIndex, spawnPoint, FRotator::ZeroRotator);
+		//}
 	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("%s end"), ANSI_TO_TCHAR(__FUNCTION__));
