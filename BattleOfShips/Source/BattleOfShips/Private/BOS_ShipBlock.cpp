@@ -103,6 +103,7 @@ void ABOS_ShipBlock::BeginPlay()
 		}
 		AbilitySystem->InitAbilityActorInfo(this, this);
 	}
+	OnDataRefresh();
 }
 
 float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -478,7 +479,7 @@ void ABOS_ShipBlock::ElectricShock_Implementation(ABOS_ShipBlock *Enemy)
 
 void ABOS_ShipBlock::OnDataRefresh_Implementation()
 {
-	if (Atk == 0.f)
+	if (AttributeSet->BaseAttackPower <= 0.f)
 	{
 		Gun->SetVisibility(false);
 	}
@@ -510,7 +511,7 @@ void ABOS_ShipBlock::Shoot_Implementation()
 	auto world = GetWorld();
 	if (world)
 	{
-		if (Atk > 0.f)
+		if (AttributeSet->BaseAttackPower > 0.f)
 		{
 			Shoot_Multi();
 		}
@@ -528,9 +529,9 @@ void ABOS_ShipBlock::Shoot_Multi_Implementation()
 	auto world = GetWorld();
 	if (world)
 	{
-		auto remaining = world->GetTimerManager().GetTimerRemaining(ShootTimer);
+		/*auto remaining = world->GetTimerManager().GetTimerRemaining(ShootTimer);
 		if (remaining <= 0.f)
-		{
+		{*/
 			world->GetTimerManager().SetTimer(ShootTimer, 1.f, false);
 			auto trans = Gun->GetSocketTransform(TEXT("Gun"));
 			auto loc = trans.GetLocation();
@@ -538,7 +539,7 @@ void ABOS_ShipBlock::Shoot_Multi_Implementation()
 			FActorSpawnParameters sp;
 			sp.Instigator = this;
 			auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
-		}
+		//}
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server End"));
 }
