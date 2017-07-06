@@ -53,6 +53,18 @@ public:
 	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
 		float BaseAttackPower;
 
+	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+		float ImpulseForce;
+
+	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+		float AngularImpulse;
+
+	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+		float AngularImpulseStepUp;
+
+	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+		float ImpulseForceStepUp;
+
 	UFUNCTION(BlueprintCallable, Category = "Attribute|HP")
 		FGameplayAttribute HealthAttribute();
 };

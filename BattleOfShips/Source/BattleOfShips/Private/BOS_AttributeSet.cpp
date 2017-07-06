@@ -5,6 +5,7 @@
 #include "GameplayEffectExtension.h"
 #include "BOS_ShipBlock.h"
 #include "BOS_AttributeSet.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 //UBOS_AttributeSet::UBOS_AttributeSet()

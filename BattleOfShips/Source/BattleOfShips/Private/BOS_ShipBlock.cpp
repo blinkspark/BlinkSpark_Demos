@@ -34,10 +34,10 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	//AtkFactor = 1.f;
 	//DefFactor = 0.5f;
 
-	AngularImpulse = 3000.f;
-	ImpulseForce = 10000.f;
-	AngularImpulseStepUp = 9000.f;
-	ImpulseForceStepUp = 3000.f;
+	//AngularImpulse = 3000.f;
+	//ImpulseForce = 10000.f;
+	//AngularImpulseStepUp = 9000.f;
+	//ImpulseForceStepUp = 3000.f;
 
 	DeltaNormalizer = 1.f;
 	GunRotateDelta = 0.5f;
@@ -227,7 +227,7 @@ bool ABOS_ShipBlock::ReplicateSubobjects(UActorChannel * Channel, FOutBunch * Bu
 
 void ABOS_ShipBlock::Forward_Implementation(float Axis)
 {
-	ShipBody->AddForce(ImpulseForce * forwardVec * Axis);
+	ShipBody->AddForce(AttributeSet->ImpulseForce * forwardVec * Axis);
 
 }
 bool ABOS_ShipBlock::Forward_Validate(float Axis)
@@ -238,7 +238,7 @@ bool ABOS_ShipBlock::Forward_Validate(float Axis)
 
 void ABOS_ShipBlock::Right_Implementation(float Axis)
 {
-	ShipBody->AddForce(ImpulseForce * rightVec * Axis);
+	ShipBody->AddForce(AttributeSet->ImpulseForce * rightVec * Axis);
 }
 
 bool ABOS_ShipBlock::Right_Validate(float Axis)
@@ -255,7 +255,7 @@ void ABOS_ShipBlock::FollowV_Implementation()
 	auto yaw = FMath::GetMappedRangeValueUnclamped(FVector2D(-90.f, 90.f), FVector2D(-DeltaNormalizer, DeltaNormalizer), deltaR.Yaw);
 	//auto yaw = deltaR.Yaw;
 
-	ShipBody->AddAngularImpulse(FVector(0.f, 0.f, yaw * (-AngularImpulse)));
+	ShipBody->AddAngularImpulse(FVector(0.f, 0.f, yaw * (-AttributeSet->AngularImpulse)));
 }
 
 void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
@@ -295,8 +295,8 @@ void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketNam
 		//this->ImpulseForce += ImpulseForceStepUp;
 
 		auto childrenCount = GetChildrenCount(this);
-		AngularImpulse = AngularImpulseStepUp * (childrenCount + 1) + AngularImpulseStepUp / (10 - childrenCount);
-		ImpulseForce = ImpulseForceStepUp * (childrenCount + 1) + AngularImpulseStepUp / (10 - childrenCount);
+		AttributeSet->AngularImpulse = AttributeSet->AngularImpulseStepUp * (childrenCount + 1) + AttributeSet->AngularImpulseStepUp / (10 - childrenCount);
+		AttributeSet->ImpulseForce = AttributeSet->ImpulseForceStepUp * (childrenCount + 1) + AttributeSet->AngularImpulseStepUp / (10 - childrenCount);
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
 		if (other)
 		{
@@ -481,6 +481,11 @@ void ABOS_ShipBlock::ElectricShock_Implementation(ABOS_ShipBlock *Enemy)
 
 void ABOS_ShipBlock::OnDataRefresh_Implementation()
 {
+	if (bDebugMode)
+	{
+		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("ImpulseForce: %f"), AttributeSet->ImpulseForce));
+	}
+
 	if (AttributeSet->BaseAttackPower <= 0.f)
 	{
 		Gun->SetVisibility(false);
