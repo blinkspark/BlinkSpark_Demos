@@ -56,7 +56,7 @@ void ABOS_Projectile::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("speed: %f"), speed.X);
 		ProjectileMovement->UpdateComponentVelocity();
 
-		DMG = instigator ? instigator->Atk : 160.f;
+		//DMG = instigator ? instigator->Atk : 160.f;
 	}
 }
 

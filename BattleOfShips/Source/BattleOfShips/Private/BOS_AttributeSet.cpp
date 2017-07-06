@@ -31,13 +31,16 @@ void UBOS_AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 	if (target)
 	{
+		target->OnDataRefresh();
 		float hp = target->AttributeSet->HP;
-		UE_LOG(LogTemp, Error, TEXT("HP: %f"), target->AttributeSet->HP);
+		if (bDebugMode)
+		{
+			UE_LOG(LogTemp, Error, TEXT("HP: %f"), target->AttributeSet->HP);
+		}
 		if (hp <= 0.f)
 		{
 			target->Destroy();
 		}
-				
 	}
 }
 

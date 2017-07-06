@@ -43,11 +43,11 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	GunRotateDelta = 0.5f;
 
 	// Replicate Props
-	HP = MaxHP = 300.f;
-	Atk = 160.f;
-	Def = 20.f;
-	CritcalRate = 0.1f;
-	CritcalDmg = 1.5f;
+	//HP = MaxHP = 300.f;
+	//Atk = 160.f;
+	//Def = 20.f;
+	//CritcalRate = 0.1f;
+	//CritcalDmg = 1.5f;
 
 	ShipBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShipBody"));
 	RootComponent = ShipBody;
@@ -111,34 +111,35 @@ float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent,
 {
 
 	// TODO Skill Factor
-	auto finalDmg = Damage*AtkFactor - Def*DefFactor;
+	//auto finalDmg = Damage*AtkFactor - Def*DefFactor;
 
-	auto randf = FMath::RandRange(0.f, 1.f);
-	if (finalDmg > 0.f && randf <= CritcalRate)
-	{
-		finalDmg *= CritcalDmg;
-	}
+	//auto randf = FMath::RandRange(0.f, 1.f);
+	//if (finalDmg > 0.f && randf <= CritcalRate)
+	//{
+	//	finalDmg *= CritcalDmg;
+	//}
 
-	HP -= finalDmg;
+	////HP -= finalDmg;
 
-	HP = HP >= 0.f ? HP : 0.f;
+	//HP = HP >= 0.f ? HP : 0.f;
 
-	if (HP == 0.f)
-	{
-		auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
-		auto ps = Cast<ABOS_PlayerState>(rootActor->PlayerState);
-		if (ps)
-		{
-			if (this == rootActor)
-			{
-				ps->bIsDead = true;
-			}
-			Destroy();
-		}
-	}
+	//if (HP == 0.f)
+	//{
+	//	auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
+	//	auto ps = Cast<ABOS_PlayerState>(rootActor->PlayerState);
+	//	if (ps)
+	//	{
+	//		if (this == rootActor)
+	//		{
+	//			ps->bIsDead = true;
+	//		}
+	//		Destroy();
+	//	}
+	//}
 
 	//UE_LOG(LogTemp, Warning, TEXT("%f DMG Taken"), finalDmg > 0.f ? finalDmg : 1.f);
-	return finalDmg > 0.f ? finalDmg : 1.f;
+	//return finalDmg > 0.f ? finalDmg : 1.f;
+	return Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 }
 
 // Called every frame
@@ -206,20 +207,20 @@ void ABOS_ShipBlock::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	if (HasAuthority() && !TestSkill)
-	{
-		TestSkill = NewObject<UBOS_Skill>(this);
-	}
+	//if (HasAuthority() && !TestSkill)
+	//{
+	//	TestSkill = NewObject<UBOS_Skill>(this);
+	//}
 }
 
 bool ABOS_ShipBlock::ReplicateSubobjects(UActorChannel * Channel, FOutBunch * Bunch, FReplicationFlags * RepFlags)
 {
 	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 
-	if (TestSkill != nullptr)
-	{
-		WroteSomething |= Channel->ReplicateSubobject(TestSkill, *Bunch, *RepFlags);
-	}
+	//if (TestSkill != nullptr)
+	//{
+	//	WroteSomething |= Channel->ReplicateSubobject(TestSkill, *Bunch, *RepFlags);
+	//}
 
 	return WroteSomething;
 }
@@ -484,6 +485,7 @@ void ABOS_ShipBlock::OnDataRefresh_Implementation()
 	{
 		Gun->SetVisibility(false);
 	}
+
 }
 
 void ABOS_ShipBlock::RotateGun_Implementation(float Axis)
@@ -551,13 +553,13 @@ void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ABOS_ShipBlock, GunRotator);
-	DOREPLIFETIME(ABOS_ShipBlock, HP);
-	DOREPLIFETIME(ABOS_ShipBlock, MaxHP);
-	DOREPLIFETIME(ABOS_ShipBlock, Atk);
-	DOREPLIFETIME(ABOS_ShipBlock, Def);
-	DOREPLIFETIME(ABOS_ShipBlock, CritcalRate);
-	DOREPLIFETIME(ABOS_ShipBlock, CritcalDmg);
-	DOREPLIFETIME(ABOS_ShipBlock, TestSkill);
+	//DOREPLIFETIME(ABOS_ShipBlock, HP);
+	//DOREPLIFETIME(ABOS_ShipBlock, MaxHP);
+	//DOREPLIFETIME(ABOS_ShipBlock, Atk);
+	//DOREPLIFETIME(ABOS_ShipBlock, Def);
+	//DOREPLIFETIME(ABOS_ShipBlock, CritcalRate);
+	//DOREPLIFETIME(ABOS_ShipBlock, CritcalDmg);
+	//DOREPLIFETIME(ABOS_ShipBlock, TestSkill);
 	DOREPLIFETIME(ABOS_ShipBlock, TeamID);
 
 }

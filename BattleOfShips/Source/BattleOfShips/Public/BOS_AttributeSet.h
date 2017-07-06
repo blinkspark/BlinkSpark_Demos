@@ -20,6 +20,9 @@ public:
 
 	void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData &Data) override;
 
+	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+		uint8 bDebugMode : 1;
+
 	UPROPERTY(Category = "Attribute|HP", EditAnywhere, ReplicatedUsing = OnRep_HP, BlueprintReadWrite)
 		float HP;
 	UFUNCTION()
@@ -27,6 +30,9 @@ public:
 	{
 		GAMEPLAYATTRIBUTE_REPNOTIFY(UBOS_AttributeSet, HP);
 	}
+
+	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+		float MaxHP;
 
 	UPROPERTY(Category = "Attribute|Team", EditAnywhere, ReplicatedUsing = OnRep_TeamID, BlueprintReadWrite)
 		float TeamID;
@@ -37,7 +43,7 @@ public:
 	}
 
 	//Outgoing damage-multiplier.
-	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite, meta = (HideFromModifiers))
+	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
 		float AttackMultiplier;
 
 	//Incoming damage-multiplier.

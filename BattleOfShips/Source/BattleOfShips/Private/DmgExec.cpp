@@ -97,9 +97,9 @@ void UDmgExec::Execute_Implementation(const FGameplayEffectCustomExecutionParame
 		&& targetSB->CanAttack()
 		&& targetSB->TeamID == sourceSB->TeamID)
 	{
-		if (targetSB->AttributeSet->HP - dmg > targetSB->MaxHP)
+		if (targetSB->AttributeSet->HP - dmg > targetSB->AttributeSet->MaxHP)
 		{
-			dmg = targetSB->AttributeSet->HP - targetSB->MaxHP;
+			dmg = targetSB->AttributeSet->HP - targetSB->AttributeSet->MaxHP;
 		}
 		OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(Attributes.HPProperty, EGameplayModOp::Additive, -dmg));
 		UE_LOG(LogTemp, Warning, TEXT("dmg: %f"), dmg);
