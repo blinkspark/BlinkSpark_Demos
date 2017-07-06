@@ -31,8 +31,8 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	forwardVec = FVector(1.f, 0.f, 0.f);
 	rightVec = FVector(0.f, 1.f, 0.f);
 
-	AtkFactor = 1.f;
-	DefFactor = 0.5f;
+	//AtkFactor = 1.f;
+	//DefFactor = 0.5f;
 
 	AngularImpulse = 3000.f;
 	ImpulseForce = 10000.f;
