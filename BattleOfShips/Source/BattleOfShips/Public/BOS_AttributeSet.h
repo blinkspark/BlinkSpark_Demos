@@ -16,6 +16,8 @@ class BATTLEOFSHIPS_API UBOS_AttributeSet : public UAttributeSet
 
 public:
 
+	//UBOS_AttributeSet();
+
 	void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData &Data) override;
 
 	UPROPERTY(Category = "Attribute|HP", EditAnywhere, ReplicatedUsing = OnRep_HP, BlueprintReadWrite)

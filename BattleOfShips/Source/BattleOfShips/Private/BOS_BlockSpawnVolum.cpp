@@ -54,7 +54,7 @@ void ABOS_BlockSpawnVolum::OnSpawn()
 		
 		FActorSpawnParameters sp;
 		sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
-		ABOS_ShipBlock *block = nullptr;
+		AActor *block = nullptr;
 		auto mapCount = SpawnMap.Num();
 		while (!block && mapCount)
 		{
@@ -64,7 +64,11 @@ void ABOS_BlockSpawnVolum::OnSpawn()
 				if (rand < m.Value)
 				{
 					auto spawnPoint = UKismetMathLibrary::RandomPointInBoundingBox(origin, boxExtent);
-					block = Cast<ABOS_ShipBlock>(world->SpawnActor(m.Key, &spawnPoint, &FRotator::ZeroRotator, sp));
+					block = world->SpawnActor(m.Key, &spawnPoint, &FRotator::ZeroRotator, sp);
+					if (block)
+					{
+						break;
+					}
 				}
 			}
 

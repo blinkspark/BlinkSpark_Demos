@@ -7,6 +7,9 @@
 #include "BOS_AttributeSet.h"
 
 
+//UBOS_AttributeSet::UBOS_AttributeSet()
+//{
+//}
 
 
 void UBOS_AttributeSet::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -17,6 +20,7 @@ void UBOS_AttributeSet::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > &
 	DOREPLIFETIME_CONDITION_NOTIFY(UBOS_AttributeSet, HP, COND_None, REPNOTIFY_Always); //This is how it is done properly for attributes. 
 	DOREPLIFETIME_CONDITION_NOTIFY(UBOS_AttributeSet, TeamID, COND_None, REPNOTIFY_Always); //This is how it is done properly for attributes. 
 }
+
 
 void UBOS_AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData &Data)
 {

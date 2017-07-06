@@ -25,6 +25,9 @@ ABOS_ShipBlock::ABOS_ShipBlock()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	bDebugMode = true;
+	bUseNewAttribute = false;
+
 	forwardVec = FVector(1.f, 0.f, 0.f);
 	rightVec = FVector(0.f, 1.f, 0.f);
 
@@ -98,10 +101,8 @@ void ABOS_ShipBlock::BeginPlay()
 		{
 			AbilitySystem->GiveAbility(FGameplayAbilitySpec(AtkAbility.GetDefaultObject(), 1, 0));
 			AbilitySystem->GiveAbility(FGameplayAbilitySpec(HealAbility.GetDefaultObject(), 1, 1));
-
 			//UE_LOG(LogTemp, Warning, TEXT("Give Ability"));
 		}
-		AbilitySystem->InitAbilityActorInfo(this, this);
 	}
 	OnDataRefresh();
 }
@@ -529,9 +530,9 @@ void ABOS_ShipBlock::Shoot_Multi_Implementation()
 	auto world = GetWorld();
 	if (world)
 	{
-		/*auto remaining = world->GetTimerManager().GetTimerRemaining(ShootTimer);
+		auto remaining = world->GetTimerManager().GetTimerRemaining(ShootTimer);
 		if (remaining <= 0.f)
-		{*/
+		{
 			world->GetTimerManager().SetTimer(ShootTimer, 1.f, false);
 			auto trans = Gun->GetSocketTransform(TEXT("Gun"));
 			auto loc = trans.GetLocation();
@@ -539,7 +540,7 @@ void ABOS_ShipBlock::Shoot_Multi_Implementation()
 			FActorSpawnParameters sp;
 			sp.Instigator = this;
 			auto actor = world->SpawnActor(ProjectileClass, &loc, &rot, sp);
-		//}
+		}
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server End"));
 }
