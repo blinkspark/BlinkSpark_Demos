@@ -560,6 +560,7 @@ void ABOS_ShipBlock::Attack_Implementation()
 	{
 		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT(__FUNCTION__)));
 	}
+	
 }
 bool ABOS_ShipBlock::Attack_Validate()
 {
