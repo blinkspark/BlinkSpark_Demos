@@ -19,7 +19,7 @@
 
 
 // Sets default values
-ABOS_ShipBlock::ABOS_ShipBlock()
+ABOS_ShipBlock::ABOS_ShipBlock():TagName(TEXT("AbilityTags.Attack"))
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -199,7 +199,7 @@ void ABOS_ShipBlock::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ABOS_ShipBlock::Forward);
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &ABOS_ShipBlock::Right);
 	PlayerInputComponent->BindAxis(TEXT("GunRotate"), this, &ABOS_ShipBlock::RotateGun);
-	//PlayerInputComponent->BindAction(TEXT("Shoot"), IE_Pressed, this, &ABOS_ShipBlock::Shoot);
+	PlayerInputComponent->BindAction(TEXT("Attack"), IE_Pressed, this, &ABOS_ShipBlock::Shoot);
 	AbilitySystem->BindAbilityActivationToInputComponent(PlayerInputComponent, FGameplayAbiliyInputBinds("ConfirmInput", "CancelInput", "EAbilityInput"));
 }
 
@@ -338,7 +338,7 @@ FName ABOS_ShipBlock::GetSocketNameByAngle(float Angle)
 ABOS_ShipBlock * ABOS_ShipBlock::GetRootActor()
 {
 	ABOS_ShipBlock *ret = this;
-	while (ret->GetOwner())
+	while (ret && ret->GetOwner())
 	{
 		ret = Cast<ABOS_ShipBlock>(ret->GetOwner());
 	}
@@ -348,7 +348,7 @@ ABOS_ShipBlock * ABOS_ShipBlock::GetRootActor()
 ABOS_ShipBlock * ABOS_ShipBlock::GetAttachRootActor()
 {
 	ABOS_ShipBlock *ret = this;
-	while (ret->GetAttachParentActor())
+	while (ret && ret->GetAttachParentActor())
 	{
 		ret = Cast<ABOS_ShipBlock>(ret->GetAttachParentActor());
 	}
@@ -530,6 +530,7 @@ bool ABOS_ShipBlock::Shoot_Validate()
 {
 	return true;
 }
+
 void ABOS_ShipBlock::Shoot_Multi_Implementation()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot_Server Start"));
@@ -553,6 +554,17 @@ void ABOS_ShipBlock::Shoot_Multi_Implementation()
 }
 
 
+void ABOS_ShipBlock::Attack_Implementation()
+{
+	if (bDebugMode)
+	{
+		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT(__FUNCTION__)));
+	}
+}
+bool ABOS_ShipBlock::Attack_Validate()
+{
+	return true;
+}
 
 void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {

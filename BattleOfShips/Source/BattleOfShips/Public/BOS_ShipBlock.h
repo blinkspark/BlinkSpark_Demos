@@ -6,6 +6,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/BoxComponent.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayAbilityTypes.h"
 #include "BOS_ShipBlock.generated.h"
 
 UENUM(BlueprintType)
@@ -93,6 +94,9 @@ public:
 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "ShipBlock|Multicast")
 		void Shoot_Multi();
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
+		void Attack();
+
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 		void FollowV();
 
@@ -151,6 +155,11 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	//	UDataTable *TestDataTable;
 
+	UPROPERTY()
+		FGameplayEventData GEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameplayEvent", meta = (AllowPrivateAccess = "true"))
+		FName TagName;
 
 	/** BP ReadOnly */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

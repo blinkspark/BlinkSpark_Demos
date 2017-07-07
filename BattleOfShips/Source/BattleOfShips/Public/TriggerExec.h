@@ -16,6 +16,4 @@ class BATTLEOFSHIPS_API UTriggerExec : public UGameplayEffectExecutionCalculatio
 public:
 	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, OUT FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
 
-	
-	
 };
