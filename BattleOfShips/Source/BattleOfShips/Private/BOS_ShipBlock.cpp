@@ -16,6 +16,8 @@
 #include "BOS_AttributeSet.h"
 #include "GameplayAbilitySet.h"
 #include "BOS_ShipBlock.h"
+#include "AbilitySystemBlueprintLibrary.h"
+
 
 
 // Sets default values
@@ -199,7 +201,7 @@ void ABOS_ShipBlock::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ABOS_ShipBlock::Forward);
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &ABOS_ShipBlock::Right);
 	PlayerInputComponent->BindAxis(TEXT("GunRotate"), this, &ABOS_ShipBlock::RotateGun);
-	PlayerInputComponent->BindAction(TEXT("Attack"), IE_Pressed, this, &ABOS_ShipBlock::Shoot);
+	PlayerInputComponent->BindAction(TEXT("Attack"), IE_Pressed, this, &ABOS_ShipBlock::Attack);
 	AbilitySystem->BindAbilityActivationToInputComponent(PlayerInputComponent, FGameplayAbiliyInputBinds("ConfirmInput", "CancelInput", "EAbilityInput"));
 }
 
@@ -303,6 +305,16 @@ void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketNam
 			other->TeamID = TeamID;
 		}
 	}
+}
+
+void ABOS_ShipBlock::SetAbilityIndex_Implementation(int Index)
+{
+	AbilityIndex = Index;
+}
+
+bool ABOS_ShipBlock::SetAbilityIndex_Validate(int Index)
+{
+	return true;
 }
 
 FName ABOS_ShipBlock::GetSocketNameByAngle(float Angle)
@@ -560,7 +572,16 @@ void ABOS_ShipBlock::Attack_Implementation()
 	{
 		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT(__FUNCTION__)));
 	}
-	
+	auto tag = FGameplayTag::RequestGameplayTag(FName(*TagName));
+	if (tag.IsValid())
+	{
+		GEvent.EventTag = tag;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, tag, GEvent);
+		if (bDebugMode)
+		{
+			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Event Sent tag : %s"), tag.ToString().GetCharArray().GetData()));
+		}
+	}
 }
 bool ABOS_ShipBlock::Attack_Validate()
 {
@@ -579,6 +600,10 @@ void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 	//DOREPLIFETIME(ABOS_ShipBlock, CritcalDmg);
 	//DOREPLIFETIME(ABOS_ShipBlock, TestSkill);
 	DOREPLIFETIME(ABOS_ShipBlock, TeamID);
+	DOREPLIFETIME(ABOS_ShipBlock, ProjectileClass);
+	DOREPLIFETIME(ABOS_ShipBlock, AbilityIndex);
+
+
 
 }
 

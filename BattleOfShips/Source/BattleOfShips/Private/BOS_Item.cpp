@@ -72,6 +72,7 @@ void ABOS_Item::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 					auto ab = otherRoot->AbilitySystem;
 					auto context = ab->MakeEffectContext();
 					ab->ApplyGameplayEffectToSelf(effect, 0, context);
+					otherRoot->AbilityIndex = AbilityIndex;
 				}
 				//otherActor->AbilitySystem->ApplyGameplayEffectToS
 				Destroy();

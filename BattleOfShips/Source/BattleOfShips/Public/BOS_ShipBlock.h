@@ -97,6 +97,9 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
 		void Attack();
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "ShipBlock|Controlls")
+		void SetAbilityIndex(int Index);
+
 	UFUNCTION(BlueprintNativeEvent, Category = "ShipBlock|Logic")
 		void FollowV();
 
@@ -159,7 +162,7 @@ public:
 		FGameplayEventData GEvent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameplayEvent", meta = (AllowPrivateAccess = "true"))
-		FName TagName;
+		FString TagName;
 
 	/** BP ReadOnly */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -207,7 +210,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float GunRotateDelta;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class ABOS_Projectile> ProjectileClass;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
@@ -222,10 +225,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class UGameplayEffect> DMGEffect;
 
+	
 
 	/****************  Replicated  **************************/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		FRotator GunRotator;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+		int AbilityIndex;
 
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 		float HP;

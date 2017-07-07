@@ -34,6 +34,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties")
 		TSubclassOf<class UGameplayEffect> EffectToApply;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties")
+		int AbilityIndex;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		USphereComponent *Trigger;
 
