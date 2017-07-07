@@ -44,8 +44,6 @@ void ABOS_Projectile::BeginPlay()
 	auto world = GetWorld();
 	if (world)
 	{
-
-
 		auto forward = RootComponent->GetForwardVector();
 		auto instigator = Cast<ABOS_ShipBlock>(GetInstigator());
 		auto speed = instigator ? instigator->GetVelocity() : FVector();
