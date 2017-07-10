@@ -486,7 +486,10 @@ void ABOS_ShipBlock::ElectricShock_Implementation(ABOS_ShipBlock *Enemy)
 	{
 		auto effectToApply = Cast<UGameplayEffect>(DMGEffect.GetDefaultObject());
 		AbilitySystem->ApplyGameplayEffectToTarget(effectToApply, Enemy->AbilitySystem);
-		UE_LOG(LogTemp, Warning, TEXT("%s"), ANSI_TO_TCHAR(__FUNCTION__));
+		if (bDebugMode)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s"), ANSI_TO_TCHAR(__FUNCTION__));
+		}
 	}
 	ElectricShockEffect(Enemy);
 }

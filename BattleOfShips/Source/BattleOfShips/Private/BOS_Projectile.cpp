@@ -15,6 +15,7 @@ ABOS_Projectile::ABOS_Projectile()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	//bReplicates = true;
+	bDebugMode = false;
 
 	BodyCollision = CreateDefaultSubobject<USphereComponent>(TEXT("BodyCollision"));
 	RootComponent = BodyCollision;
@@ -49,9 +50,13 @@ void ABOS_Projectile::BeginPlay()
 		auto speed = instigator ? instigator->GetVelocity() : FVector();
 
 		ProjectileMovement->MaxSpeed = 0.f;
-		speed.X += LaunchSpeed;
-		ProjectileMovement->SetVelocityInLocalSpace(speed);
-		UE_LOG(LogTemp, Warning, TEXT("speed: %f"), speed.X);
+		speed += RootComponent->GetForwardVector() * LaunchSpeed;;
+		
+		ProjectileMovement->Velocity =speed;
+		if (bDebugMode)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("speed: %f"), speed.X);
+		}
 		ProjectileMovement->UpdateComponentVelocity();
 
 		//DMG = instigator ? instigator->Atk : 160.f;

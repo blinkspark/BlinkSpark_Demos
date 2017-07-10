@@ -16,7 +16,7 @@ ABOS_Item::ABOS_Item()
 
 	bReplicates = true;
 
-	DebugMode = true;
+	DebugMode = false;
 
 	Trigger = CreateDefaultSubobject<USphereComponent>(TEXT("Trigger"));
 	Trigger->SetSphereRadius(200.f);
@@ -55,7 +55,8 @@ void ABOS_Item::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 {
 	if (DebugMode)
 	{
-		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT(__FUNCTION__)));
+		UE_LOG(LogTemp, Warning, TEXT(__FUNCTION__));
+		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT(__FUNCTION__)));
 	}
 	auto otherComp = Cast<UStaticMeshComponent>(OtherComp);
 	auto otherActor = Cast<ABOS_ShipBlock>(OtherActor);
