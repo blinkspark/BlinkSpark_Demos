@@ -5,6 +5,23 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "DataStructureLib.generated.h"
 
+USTRUCT(BlueprintType)
+struct FHexTree
+{
+	GENERATED_BODY()
+public:
+	FHexTree();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		uint8 bIsRoot : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		TMap<FName, class ABOS_ShipBlock*> Leaves;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		class ABOS_ShipBlock *Trunk;
+};
+
 /**
  * 
  */
@@ -14,9 +31,18 @@ class BATTLEOFSHIPS_API UDataStructureLib : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 	
 public:
+	const static bool bDebugMode = true;
 
-	UFUNCTION(BlueprintCallable, Category = "Test")
-		static void Test();
+	UFUNCTION(BlueprintCallable, Category = "HexTree")
+		static class ABOS_ShipBlock *GetOppositeLeaf(FHexTree &Tree, class ABOS_ShipBlock *Leaf);
 	
-	
+	UFUNCTION(BlueprintCallable, Category = "HexTree")
+		static TArray<class ABOS_ShipBlock*>GetAllChildren(const FHexTree &Tree);
+
+	UFUNCTION(BlueprintCallable, Category = "HexTree")
+		static FName FindLeafName(const FHexTree &Tree, const ABOS_ShipBlock *Leaf);
+
+	//UFUNCTION(BlueprintCallable, Category = "HexTree")
+	//	static TPair<FName, class ABOS_ShipBlock*> FindLeaf(FHexTree &Tree, class ABOS_ShipBlock *Leaf);
 };
+

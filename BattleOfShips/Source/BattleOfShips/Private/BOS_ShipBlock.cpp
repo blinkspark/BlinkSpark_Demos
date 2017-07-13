@@ -21,7 +21,7 @@
 
 
 // Sets default values
-ABOS_ShipBlock::ABOS_ShipBlock():TagName(TEXT("AbilityTags.Attack"))
+ABOS_ShipBlock::ABOS_ShipBlock() :TagName(TEXT("AbilityTags.Attack")), HexTree()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -78,7 +78,7 @@ ABOS_ShipBlock::ABOS_ShipBlock():TagName(TEXT("AbilityTags.Attack"))
 	AttributeSet = CreateDefaultSubobject<UBOS_AttributeSet>(TEXT("AttributeSet"));
 
 	AbilitySet = CreateDefaultSubobject<UGameplayAbilitySet>(TEXT("AbilitySet"));
-
+	
 	//ConstructorHelpers::FObjectFinder<UDataTable> TestTable(TEXT("/Game/UI/Book1.Book1"));
 	//this->TestDataTable = TestTable.Object;
 	//BlinkCombatSystemComponent = CreateDefaultSubobject<UBlinkCombatSystemComponent>(TEXT("BlinkCombatSystemComponent"));
@@ -97,16 +97,18 @@ void ABOS_ShipBlock::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("%s:%d"), i->name.GetCharArray().GetData(), i->age);
 	}*/
 
-	if (AbilitySystem)
+	HexTree.Trunk = this;
+
+	if (HasAuthority())
 	{
-		if (HasAuthority() && AtkAbility && HealAbility)
+		if (AbilitySystem && AtkAbility && HealAbility)
 		{
 			AbilitySystem->GiveAbility(FGameplayAbilitySpec(AtkAbility.GetDefaultObject(), 1, 0));
 			AbilitySystem->GiveAbility(FGameplayAbilitySpec(HealAbility.GetDefaultObject(), 1, 1));
 			//UE_LOG(LogTemp, Warning, TEXT("Give Ability"));
 		}
+		OnDataRefresh();
 	}
-	OnDataRefresh();
 }
 
 float ABOS_ShipBlock::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -262,8 +264,8 @@ void ABOS_ShipBlock::FollowV_Implementation()
 
 void ABOS_ShipBlock::ShipBodyHit_Implementation(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
 {
-	auto world = GetWorld();
-	if (world && world->IsServer() && OtherActor)
+	//auto world = GetWorld();
+	if (HasAuthority() && OtherActor)
 	{
 		auto rootActor = Cast<ABOS_ShipBlock>(GetRootActor());
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
@@ -295,15 +297,17 @@ void ABOS_ShipBlock::OnAttach_Implementation(AActor *OtherActor, FName SocketNam
 	{
 		//this->AngularImpulse += AngularImpulseStepUp;
 		//this->ImpulseForce += ImpulseForceStepUp;
-
 		auto childrenCount = GetChildrenCount(this);
-		AttributeSet->AngularImpulse = AttributeSet->AngularImpulseStepUp * (childrenCount + 1) + AttributeSet->AngularImpulseStepUp / (10 - childrenCount);
-		AttributeSet->ImpulseForce = AttributeSet->ImpulseForceStepUp * (childrenCount + 1) + AttributeSet->AngularImpulseStepUp / (10 - childrenCount);
+		AttributeSet->BaseAngular = AttributeSet->AngularImpulseStepUp * (childrenCount + 1) /*+ AttributeSet->AngularImpulseStepUp / (10 - childrenCount)*/;
+		AttributeSet->BaseImpulse = AttributeSet->ImpulseForceStepUp * (childrenCount + 1) /*+ AttributeSet->AngularImpulseStepUp / (10 - childrenCount)*/;
 		auto other = Cast<ABOS_ShipBlock>(OtherActor);
 		if (other)
 		{
+			HexTree.Leaves.Add(SocketName, other);
+			other->HexTree.Trunk = this;
 			other->TeamID = TeamID;
 		}
+		OnDataRefresh();
 	}
 }
 
@@ -498,13 +502,21 @@ void ABOS_ShipBlock::OnDataRefresh_Implementation()
 {
 	if (bDebugMode)
 	{
-		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("ImpulseForce: %f"), AttributeSet->ImpulseForce));
+		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("ImpulseForce: %f"), AttributeSet->ImpulseForce));
+		UE_LOG(LogTemp, Warning, TEXT("ImpulseForce: %f"), AttributeSet->ImpulseForce);
+		auto arr = UDataStructureLib::GetAllChildren(HexTree);
+		for (auto ite : arr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s"), ite->GetName().GetCharArray().GetData());
+		}
 	}
 
 	if (AttributeSet->BaseAttackPower <= 0.f)
 	{
 		Gun->SetVisibility(false);
 	}
+	AttributeSet->ImpulseForce = AttributeSet->BaseImpulse + AttributeSet->ImpulseModifier;
+	AttributeSet->AngularImpulse = AttributeSet->BaseAngular + AttributeSet->AngularModifier;
 
 }
 
@@ -582,7 +594,8 @@ void ABOS_ShipBlock::Attack_Implementation()
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, tag, GEvent);
 		if (bDebugMode)
 		{
-			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Event Sent tag : %s"), tag.ToString().GetCharArray().GetData()));
+			UE_LOG(LogTemp, Warning, TEXT("Event Sent tag : %s"), tag.ToString().GetCharArray().GetData());
+			//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Event Sent tag : %s"), tag.ToString().GetCharArray().GetData()));
 		}
 	}
 }
@@ -610,35 +623,6 @@ void ABOS_ShipBlock::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 
 }
 
-ABOS_ShipBlock * FHexTree::GetOppositeLeaf(ABOS_ShipBlock *Leaf)
-{
-	ABOS_ShipBlock *res = nullptr;
-	if (Leaf == L)
-	{
-		res = R;
-	}
-	else if (Leaf == R)
-	{
-		res = L;
-	}
-	else if (Leaf == LU)
-	{
-		res = RD;
-	}
-	else if (Leaf == RU)
-	{
-		res = LD;
-	}
-	else if (Leaf == LD)
-	{
-		res = RU;
-	}
-	else if (Leaf == RD)
-	{
-		res = LU;
-	}
-	return res;
-}
 
 bool ABOS_ShipBlock::IsEnemy(ABOS_ShipBlock *ship_block)
 {

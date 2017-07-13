@@ -52,18 +52,31 @@ public:
 
 	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
 		float BaseAttackPower;
+	/*------------------------------------------------------------------------*/
 
-	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
-		float ImpulseForce;
-
-	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
-		float AngularImpulse;
-
-	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
 		float AngularImpulseStepUp;
 
-	UPROPERTY(Category = "Attribute|HP", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
 		float ImpulseForceStepUp;
+
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
+		float BaseImpulse;
+
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
+		float BaseAngular;
+
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
+		float ImpulseModifier;
+
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
+		float AngularModifier;
+
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
+		float ImpulseForce;
+
+	UPROPERTY(Category = "Attribute|Movement", EditAnywhere, BlueprintReadWrite)
+		float AngularImpulse;
 
 	UFUNCTION(BlueprintCallable, Category = "Attribute|HP")
 		FGameplayAttribute HealthAttribute();

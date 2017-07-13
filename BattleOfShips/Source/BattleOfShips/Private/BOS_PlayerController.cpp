@@ -36,5 +36,4 @@ void ABOS_PlayerController::Tick(float DeltaTime)
 			gm->RestartPlayer(this);
 		}
 	}
-
 }
