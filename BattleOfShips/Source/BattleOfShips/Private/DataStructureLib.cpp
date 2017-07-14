@@ -46,6 +46,19 @@ FName UDataStructureLib::FindLeafName(const FHexTree &Tree, const ABOS_ShipBlock
 	return name;
 }
 
+TArray<class ABOS_ShipBlock*> UDataStructureLib::GetChildrenByTag(FHexTree &tree, FName tag)
+{
+	TArray<ABOS_ShipBlock*> res;
+	auto all = UDataStructureLib::GetAllChildren(tree);
+	for (auto ite : all)
+	{
+		if (ite->ActorHasTag(tag)) {
+			res.Add(ite);
+		}
+	}
+	return res;
+}
+
 //TPair<FName, class ABOS_ShipBlock*> UDataStructureLib::FindLeaf(FHexTree &Tree, class ABOS_ShipBlock *Leaf)
 //{
 //	TPair<FName, ABOS_ShipBlock*> res;

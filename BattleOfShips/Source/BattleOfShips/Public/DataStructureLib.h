@@ -2,8 +2,21 @@
 
 #pragma once
 
+#include "Engine/DataAsset.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "DataStructureLib.generated.h"
+
+
+UCLASS()
+class UHexTemplateTree : public UDataAsset{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		TSubclassOf<class ABOS_ShipBlock> Content;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTree")
+		TMap<FName, UHexTemplateTree*> leaves;
+};
 
 USTRUCT(BlueprintType)
 struct FHexTree
@@ -41,6 +54,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "HexTree")
 		static FName FindLeafName(const FHexTree &Tree, const ABOS_ShipBlock *Leaf);
+
+	UFUNCTION(BlueprintCallable, Category = "HexTree")
+		static TArray<class ABOS_ShipBlock*> GetChildrenByTag(FHexTree &Tree, FName tag);
 
 	//UFUNCTION(BlueprintCallable, Category = "HexTree")
 	//	static TPair<FName, class ABOS_ShipBlock*> FindLeaf(FHexTree &Tree, class ABOS_ShipBlock *Leaf);

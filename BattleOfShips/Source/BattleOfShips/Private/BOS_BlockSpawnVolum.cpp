@@ -51,7 +51,7 @@ void ABOS_BlockSpawnVolum::OnSpawn()
 	auto world = GetWorld();
 	if (world && world->IsServer())
 	{
-		
+
 		FActorSpawnParameters sp;
 		sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
 		AActor *block = nullptr;
@@ -65,15 +65,11 @@ void ABOS_BlockSpawnVolum::OnSpawn()
 				{
 					auto spawnPoint = UKismetMathLibrary::RandomPointInBoundingBox(origin, boxExtent);
 					block = world->SpawnActor(m.Key, &spawnPoint, &FRotator::ZeroRotator, sp);
-					if (block)
-					{
-						break;
-					}
+					if (block) break;
 				}
 			}
-
 		}
-		
+
 		//if (SpawnClasses.Num() > 0)
 		//{
 		//	auto randIndex = FMath::RandHelper(3);

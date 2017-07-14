@@ -19,7 +19,6 @@
 #include "AbilitySystemBlueprintLibrary.h"
 
 
-
 // Sets default values
 ABOS_ShipBlock::ABOS_ShipBlock() :TagName(TEXT("AbilityTags.Attack")), HexTree()
 {
@@ -78,7 +77,10 @@ ABOS_ShipBlock::ABOS_ShipBlock() :TagName(TEXT("AbilityTags.Attack")), HexTree()
 	AttributeSet = CreateDefaultSubobject<UBOS_AttributeSet>(TEXT("AttributeSet"));
 
 	AbilitySet = CreateDefaultSubobject<UGameplayAbilitySet>(TEXT("AbilitySet"));
+
+	UChildActorComponent *test = CreateDefaultSubobject<UChildActorComponent>(TEXT("Child"));
 	
+
 	//ConstructorHelpers::FObjectFinder<UDataTable> TestTable(TEXT("/Game/UI/Book1.Book1"));
 	//this->TestDataTable = TestTable.Object;
 	//BlinkCombatSystemComponent = CreateDefaultSubobject<UBlinkCombatSystemComponent>(TEXT("BlinkCombatSystemComponent"));
