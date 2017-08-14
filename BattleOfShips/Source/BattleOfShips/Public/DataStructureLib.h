@@ -58,6 +58,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HexTree")
 		static TArray<class ABOS_ShipBlock*> GetChildrenByTag(FHexTree &Tree, FName tag);
 
+	UFUNCTION(BlueprintCallable, Category = "HexTree")
+		static int32 GetChildrenTagCount(FHexTree &Tree, FName tag);
+
 	//UFUNCTION(BlueprintCallable, Category = "HexTree")
 	//	static TPair<FName, class ABOS_ShipBlock*> FindLeaf(FHexTree &Tree, class ABOS_ShipBlock *Leaf);
 };

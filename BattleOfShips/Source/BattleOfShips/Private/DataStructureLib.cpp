@@ -59,6 +59,13 @@ TArray<class ABOS_ShipBlock*> UDataStructureLib::GetChildrenByTag(FHexTree &tree
 	return res;
 }
 
+int32 UDataStructureLib::GetChildrenTagCount(FHexTree &Tree, FName tag)
+{
+	auto arr = UDataStructureLib::GetChildrenByTag(Tree, tag);
+	int32 count = arr.Num();
+	return count;
+}
+
 //TPair<FName, class ABOS_ShipBlock*> UDataStructureLib::FindLeaf(FHexTree &Tree, class ABOS_ShipBlock *Leaf)
 //{
 //	TPair<FName, ABOS_ShipBlock*> res;
